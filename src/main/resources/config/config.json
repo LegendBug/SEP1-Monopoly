@@ -1,0 +1,16 @@
+{
+  "screen": {
+    "titleBar": 20,
+    "width": 1280,
+    "height": 740
+  },
+  "gameInfo": {
+    "levels": 14,
+    "initialLives": 3
+  },
+  "rectangle": {
+  },
+  "imagePath": {
+    "icon": "src/main/resources/picture/menu/icon.png"
+  }
+}
