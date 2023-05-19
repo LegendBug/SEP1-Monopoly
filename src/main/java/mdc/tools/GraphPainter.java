@@ -12,7 +12,7 @@ public class GraphPainter {
     /**
      * Draw text
      *
-     * @param g     - Graphics object for creating Graphic2D
+     * @param g2d     - Graphics object for creating Graphic2D
      * @param text  - Text to be printed
      * @param name  - Font name, such as "Arial", must be true type
      * @param style - Font style, such as bold, italic, etc
@@ -21,8 +21,7 @@ public class GraphPainter {
      * @param pos   - Text position, 0 left, 1 center, 2 right
      * @param rect  - Rectangle of the position occupied by the text
      */
-    public static void drawString(Graphics g, String text, String name, int style, int size, Color color, int pos, Rectangle rect) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public static void drawString(Graphics2D g2d, String text, String name, int style, int size, Color color, int pos, Rectangle rect) {
         g2d.setFont(new Font(name, style, size));
         FontMetrics metrics = g2d.getFontMetrics();
         int x, y;
@@ -51,10 +50,9 @@ public class GraphPainter {
     /**
      * Draw rectangle
      *
-     * @param g - Graphics object for creating Graphic2D
+     * @param g2d - Graphics object for creating Graphic2D
      */
-    public static void drawRectangle(Graphics g, Color color, Rectangle rect) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public static void drawRectangle(Graphics2D g2d, Color color, Rectangle rect) {
         g2d.setColor(color);
         g2d.fill(rect);
     }
@@ -62,15 +60,14 @@ public class GraphPainter {
     /**
      * Draw an oval image
      *
-     * @param g       - Graphics object for creating Graphic2D
+     * @param g2d       - Graphics object for creating Graphic2D
      * @param color   - Image Color
      * @param x       - Upper left corner x
      * @param y       - Upper left corner y
      * @param width   - Image width
      * @param height- Image height
      */
-    public static void drawOval(Graphics g, Color color, int x, int y, int width, int height) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public static void drawOval(Graphics2D g2d, Color color, int x, int y, int width, int height) {
         g2d.setColor(color);
         g2d.fillOval(x, y, width, height);
     }
@@ -78,11 +75,10 @@ public class GraphPainter {
     /**
      * Draw a sector
      *
-     * @param g     - Graphics object for creating Graphic2D
+     * @param g2d     - Graphics object for creating Graphic2D
      * @param color - Image Color
      */
-    public static void drawAct(Graphics g, Color color, int x, int y, int width, int height, int startAngle, int arcAngle) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public static void drawAct(Graphics2D g2d, Color color, int x, int y, int width, int height, int startAngle, int arcAngle) {
         g2d.setColor(color);
         g2d.fillArc(x, y, width, height, startAngle, arcAngle);
     }
@@ -90,11 +86,10 @@ public class GraphPainter {
     /**
      * Draw a polygon
      *
-     * @param g     - Graphics object for creating Graphic2D
+     * @param g2d     - Graphics object for creating Graphic2D
      * @param color - Image Color
      */
-    public static void drawPolygon(Graphics g, Color color, int[] xPoints, int[] yPoints, int nPoints) {
-        Graphics2D g2d = (Graphics2D) g.create();
+    public static void drawPolygon(Graphics2D g2d, Color color, int[] xPoints, int[] yPoints, int nPoints) {
         g2d.setColor(color);
         g2d.fillPolygon(xPoints, yPoints, nPoints);
     }
@@ -105,4 +100,16 @@ public class GraphPainter {
     public static Image getImage(String path) throws IOException {
         return ImageIO.read(new FileInputStream(path));
     }
+
+    /**
+     * Draw an image on the Graphics context
+     *
+     * @param g2d     - Graphics object for creating Graphics2D
+     * @param image - The image to be drawn
+     * @param rect     - The rect of the image
+     */
+    public static void drawImage(Graphics2D g2d, Image image, Rectangle rect) throws IOException {
+        g2d.drawImage(image, rect.x, rect.y, rect.width, rect.height, null);
+    }
+
 }
