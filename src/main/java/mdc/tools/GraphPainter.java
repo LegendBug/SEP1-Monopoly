@@ -2,6 +2,7 @@ package mdc.tools;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -107,9 +108,36 @@ public class GraphPainter {
      * @param g2d     - Graphics object for creating Graphics2D
      * @param image - The image to be drawn
      * @param rect     - The rect of the image
+     * @param selected - Is the image chosen by player
      */
-    public static void drawImage(Graphics2D g2d, Image image, Rectangle rect) throws IOException {
-        g2d.drawImage(image, rect.x, rect.y, rect.width, rect.height, null);
+    public static void drawImage(Graphics2D g2d, Image image, Rectangle rect, boolean selected) throws IOException {
+        int x = rect.x;
+        int y = rect.y;
+        int width = rect.width;
+        int height = rect.height;
+        g2d.drawImage(image, x, y, width, height, null);
+        if (selected) {
+            Color darkColor = new Color(0, 0, 0, 255);
+            // Convert original image to BufferedImage with the given size
+            BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+            Graphics2D gResized = resizedImage.createGraphics();
+            gResized.drawImage(image, 0, 0, width, height, null);
+            gResized.dispose();
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    int argb = resizedImage.getRGB(i, j); // get the pixel data
+                    // calculate the alpha (the first 8 bits from the left)
+                    int alpha = (argb >> 24) & 0xFF;
+                    // add a dark layer keeping the original alpha
+                    if (alpha != 0) resizedImage.setRGB(i, j, darkColor.getRGB());
+                }
+            }
+            Composite oldComposite = g2d.getComposite(); // Save original composite
+            // Set the composite mode to multiply, which will darken the image
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
+            g2d.drawImage(resizedImage, x, y, null);
+            g2d.setComposite(oldComposite); // Restore original composite
+        }
     }
 
 }

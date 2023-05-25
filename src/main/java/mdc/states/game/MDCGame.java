@@ -6,8 +6,6 @@ import mdc.models.Entities.Ghost;
 import mdc.models.Entities.PacMan;
 import mdc.models.Level;
 import mdc.states.State;
-import mdc.tools.BreadthFirstPaths;
-import mdc.tools.Graph;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -34,7 +32,6 @@ public class MDCGame implements State, Game {
     /**
      * A graph containing all points and paths between points with ghost recognition
      */
-    private Graph map;
     /**
      * Player controlled Pac-Man
      */

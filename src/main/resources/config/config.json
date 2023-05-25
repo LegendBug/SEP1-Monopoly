@@ -75,6 +75,9 @@
     "history2": "src/main/resources/picture/button/history2.png",
     "history3": "src/main/resources/picture/button/history3.png",
     "desktop": "src/main/resources/picture/game/desktop.png",
-    "actionCard": "src/main/resources/picture/game/actionCard.png"
+    "actionCard": "src/main/resources/picture/game/actionCard.png",
+    "moneyCard": "src/main/resources/picture/game/moneyCard.png",
+    "propertyCard": "src/main/resources/picture/game/propertyCard.png",
+    "cardBack": "src/main/resources/picture/game/cardBack.png"
   }
 }
