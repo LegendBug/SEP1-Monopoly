@@ -299,6 +299,21 @@ public class Config {
         private String history3;
         private String desktop;
         private String actionCard;
+        private String moneyCard;
+        private String propertyCard;
+        private String cardBack;
+
+        public String getCardBack() {
+            return cardBack;
+        }
+
+        public String getMoneyCard() {
+            return moneyCard;
+        }
+
+        public String getPropertyCard() {
+            return propertyCard;
+        }
 
         public String getDesktop() {
             return desktop;
