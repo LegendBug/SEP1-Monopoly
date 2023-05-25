@@ -1,8 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
+import mdc.components.cards.ICard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -13,14 +13,12 @@ import mdc.components.players.Player;
  * @para payValue:赔多少钱
  */
 
-public class DebtCollector implements ActionInterface, CardInterface {
-    private String name;
+public class DebtCollector extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
     private int payValue;
 
-    public DebtCollector(String name,int turnMoney,int payValue){
-        this.name=name;
+    public DebtCollector(int turnMoney){
         this.turnMoney=turnMoney;
         this.payValue=payValue;
         isActing=true;
@@ -35,8 +33,8 @@ public class DebtCollector implements ActionInterface, CardInterface {
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
     }
 
     @Override
@@ -56,7 +54,7 @@ public class DebtCollector implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
     public int getPayValue() {
         return payValue;

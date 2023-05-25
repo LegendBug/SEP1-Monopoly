@@ -1,7 +1,6 @@
 package mdc.components.piles.ownbank;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.players.Player;
+import mdc.components.cards.ICard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +10,9 @@ import java.util.List;
  */
 public class OwnBank {
     private int money;
-    private Player player;
-    private List<CardInterface> cards =new ArrayList<>();
+    private List<ICard> cards =new ArrayList<>();
 
-    public OwnBank(Player player){
-        this.player=player;
+    public OwnBank(){
         money=0;
     }
 
@@ -34,13 +31,9 @@ public class OwnBank {
     }
 
 
-    public void addCard(CardInterface card){
+    public void addCard(ICard card){
         cards.add(card);
         money+=card.getTurnMoney();
-    }
-
-    public Player getPlayer() {
-        return player;
     }
 
     public int getMoney() {

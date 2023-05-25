@@ -1,8 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
+import mdc.components.cards.ICard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 
 import java.util.List;
 
@@ -11,21 +11,19 @@ import java.util.List;
  * @para turnMoney:放入银行多少钱
  * @para isActing:判断当前行动卡是否在生效
  */
-public class JustSayNo implements ActionInterface, CardInterface {
-    private String name;
+public class JustSayNo extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
 
-    public JustSayNo(String name,int turnMoney){
-        this.name=name;
+    public JustSayNo(int turnMoney){
         this.turnMoney=turnMoney;
         isActing=true;
     }
 
     public void play(ActionPile pile){
         if (isActing){
-            List<ActionInterface> pileCards=pile.getCards();
-            ActionInterface card=pileCards.get(pileCards.size()-1);
+            List<AbstractActionCard> pileCards=pile.getCards();
+            AbstractActionCard card=pileCards.get(pileCards.size()-1);
             int i=2;
             while (card instanceof JustSayNo||card instanceof DoubleRent){
                 card=pileCards.get(pileCards.size()-i);
@@ -37,8 +35,13 @@ public class JustSayNo implements ActionInterface, CardInterface {
     }
 
     @Override
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
+    }
+
+    @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 
     public boolean isActing() {
@@ -47,10 +50,6 @@ public class JustSayNo implements ActionInterface, CardInterface {
 
     public int getTurnMoney() {
         return turnMoney;
-    }
-
-    public String getName() {
-        return name;
     }
 
     @Override

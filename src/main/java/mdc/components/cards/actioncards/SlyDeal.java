@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.ICard;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -12,29 +12,27 @@ import mdc.components.players.Player;
  * @para turnMoney:放入银行多少钱
  * @para isActing:判断当前行动卡是否在生效
  */
-public class SlyDeal implements ActionInterface, CardInterface {
-    private String name;
+public class SlyDeal extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
 
 
-    public SlyDeal(String name,int turnMoney){
-        this.name=name;
+    public SlyDeal(int turnMoney){
         this.turnMoney=turnMoney;
         isActing=true;
     }
 
-    public void play(ActionPile pile,Player player, Player payPlayer, PropertyInterface property){
+    public void play(ActionPile pile, Player player, Player payPlayer, AbstractPropertyCard property){
         if (isActing){
-            player.getOwnProperty(player).addProperty(property);
-            payPlayer.getOwnProperty(payPlayer).takeProperty(property,false);
+            player.getOwnProperty().addProperty(property);
+            payPlayer.getOwnProperty().takeProperty(property,false);
             pile.addCards(this);
         }
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
     }
 
     @Override
@@ -54,6 +52,6 @@ public class SlyDeal implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 }

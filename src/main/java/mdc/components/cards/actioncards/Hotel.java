@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.ICard;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -13,30 +13,29 @@ import mdc.components.players.Player;
  * @para value:加多少钱
  * @para isActing:判断当前行动卡是否在生效
  */
-public class Hotel implements ActionInterface, CardInterface {
-    private String name;
+public class Hotel extends AbstractActionCard {
     private int turnMoney;
     private int value;
     private boolean isActing;
 
 
-    public Hotel(String name,int turnMoney,int value){
-        this.name=name;
+    public Hotel(int turnMoney){
         this.turnMoney=turnMoney;
         this.value=value;
         isActing=true;
     }
 
-    public void play(ActionPile pile,Player player, PropertyInterface card, Hotel hotel){
+    @Override
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
+    }
+
+    public void play(ActionPile pile, Player player, AbstractPropertyCard card, Hotel hotel){
         if (isActing){
-            if (player.getOwnProperty(player).ifFullSet(card)){
-                player.getOwnProperty(player).addHotel(hotel,card.getColor());
+            if (player.getOwnProperty().ifFullSet(card)){
+                player.getOwnProperty().addHotel(hotel, card.getColor());
             }
         }
-    }
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -56,7 +55,7 @@ public class Hotel implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 
     public int getValue() {

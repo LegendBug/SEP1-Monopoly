@@ -1,13 +1,10 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.cards.properties.Property;
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.ICard;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
-
-import java.util.List;
 
 /**
  * 偷一整套
@@ -16,28 +13,26 @@ import java.util.List;
  * @para isActing:判断当前行动卡是否在生效
  */
 
-public class DealBreaker implements ActionInterface, CardInterface {
-    private String name;
-    private int turnMoney;
+public class DealBreaker extends AbstractActionCard {
+    private final int turnMoney;
     private boolean isActing;
 
-    public DealBreaker(String name,int turnMoney){
-        this.name=name;
-        this.turnMoney=turnMoney;
+    public DealBreaker(int turnMoney){
+        this.turnMoney = turnMoney;
         isActing=true;
     }
 
-    public void play(ActionPile pile,Player payPlayer, PropertyInterface card){
+    public void play(ActionPile pile,Player payPlayer, AbstractPropertyCard card){
         if (isActing){
-            payPlayer.getOwnProperty(payPlayer).takeProperty(card,true);
+            payPlayer.getOwnProperty().takeProperty(card,true);
             pile.addCards(this);
         }
 
     }
 
     @Override
-    public String getName() {
-        return name;
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
     }
 
     @Override
@@ -57,6 +52,6 @@ public class DealBreaker implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 }

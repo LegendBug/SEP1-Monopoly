@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.ICard;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -13,31 +13,30 @@ import mdc.components.players.Player;
  * @para value:加多少钱
  * @para isActing:判断当前行动卡是否在生效
  */
-public class House implements ActionInterface, CardInterface {
-    private String name;
+public class House extends AbstractActionCard {
     private int turnMoney;
     private int value;
     private boolean isActing;
 
 
-    public House(String name,int turnMoney,int value){
-        this.name=name;
+    public House(int turnMoney){
         this.turnMoney=turnMoney;
         this.value=value;
         isActing=true;
     }
 
-    public void play(ActionPile pile,Player player, PropertyInterface card, House house){
+    @Override
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
+    }
+
+    public void play(ActionPile pile, Player player, AbstractPropertyCard card, House house){
         if (isActing){
-            if (player.getOwnProperty(player).ifFullSet(card)){
-                player.getOwnProperty(player).addHouse(house,card.getColor());
+            if (player.getOwnProperty().ifFullSet(card)){
+                player.getOwnProperty().addHouse(house,card.getColor());
                 pile.addCards(this);
             }
         }
-    }
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -57,7 +56,7 @@ public class House implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 
     public int getValue() {

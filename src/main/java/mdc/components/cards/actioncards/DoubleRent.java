@@ -1,9 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
+import mdc.components.cards.ICard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
-import mdc.components.players.Player;
+import mdc.components.piles.actionpile.ActionPile;
 
 /**
  * 跟一个rent卡一起用，加倍
@@ -12,27 +11,24 @@ import mdc.components.players.Player;
  * @para isActing:判断当前行动卡是否在生效
  */
 
-public class DoubleRent implements ActionInterface, CardInterface {
-    private String name;
+public class DoubleRent extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
 
-
-    public DoubleRent(String name,int turnMoney){
-        this.name=name;
+    public DoubleRent(int turnMoney){
         this.turnMoney=turnMoney;
         isActing=true;
     }
 
-    public void play(ActionPile pile,RentCard card){
+    @Override
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
+    }
+
+    public void play(ActionPile pile, RentCard card){
         if (isActing){
             pile.addCards(this);
         }
-    }
-
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -52,6 +48,6 @@ public class DoubleRent implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 }

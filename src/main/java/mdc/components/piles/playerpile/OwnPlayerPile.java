@@ -1,8 +1,9 @@
 package mdc.components.piles.playerpile;
 
-import mdc.components.cards.CardInterface;
+import mdc.components.cards.ICard;
+
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.players.Player;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,31 +12,34 @@ import java.util.List;
  * 手牌
  */
 public class OwnPlayerPile {
-    private Player player;
-    private List<CardInterface> cards;
-    public OwnPlayerPile(Player player){
-        this.player=player;
+    private List<ICard> cards;
+
+    public OwnPlayerPile(){
         cards=new ArrayList<>();
     }
 
-    public Player getPlayer() {
-        return player;
+    public int size() {
+        return cards.size();
     }
 
-    public List<CardInterface> getCards() {
+    public List<ICard> getCards() {
         return cards;
     }
 
-    public void addCards(CardInterface card){
+    public void addCard(ICard card){
         cards.add(card);
+    }
+
+    public void addCards(List<ICard> newCards) {
+        cards.addAll(newCards);
     }
 
     public void clear(){
         cards.clear();
     }
 
-    public void takeCards(CardInterface card, DrawPile pile){
+    public void takeCards(ICard card, DrawPile pile){
         cards.remove(card);
-        pile.addCards(card);
+        pile.addCard(card);
     }
 }

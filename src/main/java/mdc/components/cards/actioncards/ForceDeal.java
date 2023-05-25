@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.CardInterface;
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.ICard;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.playerpiles.ActionPile;
+import mdc.components.piles.actionpile.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -12,33 +12,32 @@ import mdc.components.players.Player;
  * @para turnMoney:放入银行多少钱
  * @para isActing:判断当前行动卡是否在生效
  */
-public class ForceDeal implements ActionInterface, CardInterface {
-    private String name;
+public class ForceDeal extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
 
 
-    public ForceDeal(String name,int turnMoney){
-        this.name=name;
+    public ForceDeal(int turnMoney){
         this.turnMoney=turnMoney;
         isActing=true;
     }
 
+    @Override
+    public void deal(DrawPile pile) {
+        pile.addCard(this);
+    }
+
     //应该在使用该方法之前用isFullSet判断是否是一整套
-    public void play(ActionPile pile,Player player, Player dealPlayer, PropertyInterface card, PropertyInterface dealCard){
+    public void play(ActionPile pile, Player player, Player dealPlayer, AbstractPropertyCard card, AbstractPropertyCard dealCard){
         if (isActing){
-            if (!dealPlayer.getOwnProperty(dealPlayer).ifFullSet(dealCard)){
-                player.getOwnProperty(player).takeProperty(card,false);
-                player.getOwnProperty(player).addProperty(dealCard);
-                dealPlayer.getOwnProperty(dealPlayer).takeProperty(dealCard,false);
-                dealPlayer.getOwnProperty(dealPlayer).addProperty(card);
+            if (!dealPlayer.getOwnProperty().ifFullSet(dealCard)){
+                player.getOwnProperty().takeProperty(card,false);
+                player.getOwnProperty().addProperty(dealCard);
+                dealPlayer.getOwnProperty().takeProperty(dealCard,false);
+                dealPlayer.getOwnProperty().addProperty(card);
                 pile.addCards(this);
             }
         }
-    }
-    @Override
-    public String getName() {
-        return name;
     }
 
     @Override
@@ -58,6 +57,6 @@ public class ForceDeal implements ActionInterface, CardInterface {
 
     @Override
     public void discard(DrawPile pile) {
-        pile.addCards((CardInterface) this);
+        pile.addCard((ICard) this);
     }
 }

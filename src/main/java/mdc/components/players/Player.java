@@ -1,6 +1,6 @@
 package mdc.components.players;
 
-import mdc.components.cards.properties.PropertyInterface;
+import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.piles.ownbank.OwnBank;
 import mdc.components.piles.ownproperties.OwnProperty;
 import mdc.components.piles.playerpile.OwnPlayerPile;
@@ -11,47 +11,23 @@ import java.util.List;
  * 创建玩家及相应功能
  */
 public class Player {
-    private int number;
-    private Player[] players;
     private OwnBank ownBank;
     private OwnProperty ownProperty;
     private OwnPlayerPile ownPlayerPile;
 
-    public Player(int number){
-        players=new Player[number];
-        for (Player player:players){
-            ownBank=new OwnBank(player);
-            ownProperty =new OwnProperty(player);
-            ownPlayerPile=new OwnPlayerPile(player);
-            player=new Player(ownBank, ownProperty,ownPlayerPile);
-        }
-    }
     public Player(OwnBank ownBank, OwnProperty ownProperty, OwnPlayerPile ownPlayerPile){
         this.ownBank = ownBank;
         this.ownProperty = ownProperty;
         this.ownPlayerPile=ownPlayerPile;
     }
 
-    public Player[] getPlayers() {
-        return players;
+
+    public OwnBank getOwnBank() {
+        return ownBank;
     }
 
-    public OwnBank getOwnBank(Player p) {
-        for (Player player:players){
-            if (player==p){
-                return player.ownBank;
-            }
-        }
-        return null;
-    }
-
-    public OwnProperty getOwnProperty(Player p){
-        for (Player player:players){
-            if (player==p){
-                return player.ownProperty;
-            }
-        }
-        return null;
+    public OwnProperty getOwnProperty(){
+        return ownProperty;
     }
 
 
@@ -71,8 +47,8 @@ public class Player {
             player.ownBank.addMoney(payPlayer.ownBank.getMoney());
             value-=payPlayer.ownBank.getMoney();
             payPlayer.ownBank.clear();
-            List<PropertyInterface> cards=payPlayer.ownProperty.choosePayCard(value);
-            for (PropertyInterface card:cards){
+            List<AbstractPropertyCard> cards=payPlayer.ownProperty.choosePayCard(value);
+            for (AbstractPropertyCard card:cards){
                 player.ownProperty.addProperty(card);
             }
         }else if (payPlayer.ownBank.getMoney()>value){
@@ -80,9 +56,6 @@ public class Player {
         }
     }
 
-    public int getNumber() {
-        return number;
-    }
 
     public OwnPlayerPile getOwnPlayerPile() {
         return ownPlayerPile;
