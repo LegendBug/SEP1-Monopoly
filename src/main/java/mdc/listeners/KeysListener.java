@@ -143,18 +143,14 @@ public class KeysListener implements KeysCommand, KeyListener {
         return false;
     }
 
-//    @Override
-//    public boolean hasPressedHighScoreScreen() {
-//        return ifHighScore;
-//    }
-
-//    @Override
-//    public boolean hasPressedMenu() {
-//        return ifMenu;
-//    }
-
     @Override
     public void resetKeyPresses() {
+        ifExit = false;
+        ifEnter = false;
+        ifUp = false;
+        ifDown = false;
+        ifRight = false;
+        ifLeft = false;
         lastExit = false;
         lastEnter = false;
         lastUp = false;

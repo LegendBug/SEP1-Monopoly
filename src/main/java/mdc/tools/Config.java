@@ -291,9 +291,15 @@ public class Config {
         private String play1;
         private String play2;
         private String play3;
+        private String discard1;
+        private String discard2;
+        private String discard3;
         private String select1;
         private String select2;
         private String select3;
+        private String cancel1;
+        private String cancel2;
+        private String cancel3;
         private String history1;
         private String history2;
         private String history3;
@@ -302,6 +308,42 @@ public class Config {
         private String moneyCard;
         private String propertyCard;
         private String cardBack;
+
+        public String getCancel1() {
+            return cancel1;
+        }
+
+        public String getCancel2() {
+            return cancel2;
+        }
+
+        public String getCancel3() {
+            return cancel3;
+        }
+
+        public String getDiscard1() {
+            return discard1;
+        }
+
+        public String getDiscard2() {
+            return discard2;
+        }
+
+        public String getDiscard3() {
+            return discard3;
+        }
+
+        public String getSelect1() {
+            return select1;
+        }
+
+        public String getSelect2() {
+            return select2;
+        }
+
+        public String getSelect3() {
+            return select3;
+        }
 
         public String getCardBack() {
             return cardBack;
@@ -361,18 +403,6 @@ public class Config {
 
         public String getPlay3() {
             return play3;
-        }
-
-        public String getSelect1() {
-            return select1;
-        }
-
-        public String getSelect2() {
-            return select2;
-        }
-
-        public String getSelect3() {
-            return select3;
         }
 
         public String getIcon() {

@@ -1,29 +1,32 @@
-package mdc.states.about;
+package mdc.states.history;
 
 import mdc.listeners.KeysListener;
+import mdc.screenpainters.HistoryScreen;
 import mdc.states.State;
+import mdc.tools.Config;
 
-public class MDCAbout implements State {
-    private static final int SCREEN_WIDTH = 960;
-    private static final int SCREEN_HEIGHT = 960;
+public class MDCHistory implements State {
+    private final Config config;
     private final KeysListener keysListener;
 
-    public MDCAbout(KeysListener keysListener) {
+    public MDCHistory(KeysListener keysListener, Config config) {
+        this.config = config;
         this.keysListener = keysListener;
+        startState();
     }
 
     @Override
     public int getScreenWidth() {
-        return SCREEN_WIDTH;
+        return HistoryScreen.SCREEN_WIDTH;
     }
 
     @Override
     public int getScreenHeight() {
-        return SCREEN_HEIGHT;
+        return HistoryScreen.SCREEN_HEIGHT;
     }
 
     @Override
-    public void buttonController() {
+    public void listenerController() {
 
     }
 
@@ -34,7 +37,7 @@ public class MDCAbout implements State {
 
     @Override
     public void updateState() {
-        buttonController();
+        listenerController();
     }
 
     @Override

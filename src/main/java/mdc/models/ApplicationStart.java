@@ -4,14 +4,12 @@ import engine.ScoreKeeper;
 import mdc.engine.GameEngine;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
-import mdc.screenpainters.AboutScreen;
 import mdc.screenpainters.GameScreen;
+import mdc.screenpainters.HistoryScreen;
 import mdc.screenpainters.MenuScreen;
-import mdc.screenpainters.ScoreScreen;
-import mdc.states.about.MDCAbout;
 import mdc.states.game.MDCGame;
+import mdc.states.history.MDCHistory;
 import mdc.states.menu.MDCMenu;
-import mdc.states.score.MDCScore;
 import mdc.tools.Config;
 import mdc.tools.ConfigLoader;
 import mdc.tools.GraphPainter;
@@ -30,7 +28,6 @@ public class ApplicationStart {
         Config config = ConfigLoader.loadConfig("src/main/resources/config/config.json");
         assert config != null;
 
-
         JFrame window = new JFrame("Monopoly Deal Cards");
         window.setIconImage(GraphPainter.getImage(config.getImagePath().getIcon()));
 
@@ -44,16 +41,15 @@ public class ApplicationStart {
         window.addMouseMotionListener(mousesListener);
 
         // 初始化窗口和引擎
-        MDCGame game = new MDCGame(keysListener, mousesListener);
-        MDCMenu menu = new MDCMenu(keysListener, mousesListener);
-        MDCAbout about = new MDCAbout(keysListener);
-        MDCScore score = new MDCScore(keysListener);
-        MenuScreen menuScreen = new MenuScreen();
-        AboutScreen aboutScreen = new AboutScreen();
+        MDCGame game = new MDCGame(keysListener, mousesListener, config);
+        MDCMenu menu = new MDCMenu(keysListener, mousesListener, config);
+        MDCHistory score = new MDCHistory(keysListener, config);
+        MenuScreen menuScreen = new MenuScreen(menu, config);
         ScoreKeeper scoreKeeper = new ScoreKeeper("src/main/resources/text/scores.txt");
-        ScoreScreen scoreScreen = new ScoreScreen(scoreKeeper);
-        GameScreen gameScreen = new GameScreen(game);
-        GameEngine engine = new GameEngine(game, menu, about, score, window, menuScreen, aboutScreen, scoreScreen, gameScreen, scoreKeeper);
+        // TODO 改history页面
+        HistoryScreen historyScreen = new HistoryScreen(scoreKeeper);
+        GameScreen gameScreen = new GameScreen(game, config);
+        GameEngine engine = new GameEngine(game, menu, score, window, menuScreen, historyScreen, gameScreen, scoreKeeper, config);
 
 //        window.setUndecorated(true); // 自定义边框
 //        JPanel titleBar = new JPanel(); // 正上方标题框
@@ -89,9 +85,11 @@ public class ApplicationStart {
                 engine.exitGame();
             }
         });
+        // 获取当前屏幕分辨率
         Insets insets = window.getInsets();
-        window.setSize(MDCGame.SCREEN_WIDTH + insets.left + insets.right,
-                MDCGame.SCREEN_HEIGHT + insets.top + insets.bottom);
+        window.setSize(GameScreen.SCREEN_WIDTH + insets.left + insets.right,
+                GameScreen.SCREEN_HEIGHT + insets.top + insets.bottom);
+        System.out.println(insets.left + insets.right + ":" + (insets.top + insets.bottom));
         window.setLocationRelativeTo(null);
         window.setResizable(false);
 

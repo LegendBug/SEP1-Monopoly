@@ -1,202 +1,442 @@
 package mdc.states.game;
 
+import mdc.components.cards.Colors;
+import mdc.components.cards.actioncards.AbstractActionCard;
+import mdc.components.cards.actioncards.RentCard;
+import mdc.components.cards.moneycards.MoneyCard;
+import mdc.components.cards.properties.AbstractPropertyCard;
+import mdc.components.cards.properties.Property;
+import mdc.components.cards.properties.PropertyWild;
+import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.piles.drawpile.DrawPile;
+import mdc.components.piles.ownbank.OwnBank;
+import mdc.components.piles.ownproperties.OwnProperty;
+import mdc.components.piles.playerpile.OwnPlayerPile;
+import mdc.components.players.Player;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
-import mdc.models.Entities.Ghost;
-import mdc.models.Entities.PacMan;
-import mdc.models.Level;
+import mdc.screenpainters.GameScreen;
+import mdc.states.ButtonStates;
 import mdc.states.State;
+import mdc.tools.Config;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MDCGame implements State, Game {
-    public static final int SCREEN_WIDTH = 1280;
-    public static final int SCREEN_HEIGHT = 720;
-    private static final int LEVELS = 14;
     private final KeysListener keysListener;
     private final MousesListener mousesListener;
-    private int playerScore;
-    private int playerLives;
-    /**
-     * Calculate whether the player reaches 10000 points, which is used to add lives
-     */
-    private int scoreCounter;
-    private int currentLevel;
-    /**
-     * Calculate the running time of the current level to judge whether the fruit appears
-     */
-    private int currentTime;
-    /**
-     * A graph containing all points and paths between points with ghost recognition
-     */
-    /**
-     * Player controlled Pac-Man
-     */
-    public PacMan pacMan;
-    /**
-     * List of ghosts
-     */
-    public List<Ghost> ghosts;
-    /**
-     * An array containing all levels
-     */
-    private Level[] levels;
-    /**
-     * List of current coordinates of ghosts
-     */
-    private List<int[]> ghostsPos;
-    /**
-     * List of adjacent coordinates to which each ghost is going
-     */
-    private List<int[]> targetsPos;
-    /**
-     * List of player coordinates (finishing point) to be reached by each ghost
-     */
-    private List<int[]> pacMansPos;
-    /**
-     * List of normal walls and walls that only ghosts can pass through
-     */
-    private List<Rectangle> wallsForPlayer;
-    /**
-     * List of recognizable path points of ghosts
-     */
-    private List<int[]> roadsForGhosts;
-    private boolean ifPause;
+    private final Config config;
+    private int playerNum;
+    private int roundNum;
+    private Player[] players;
+    private int currTime;
+    public int currPlayer;
+    private int currCard;
+    private ButtonStates buttonState;
+    private GameButtons gameButton;
+    private GamePhases lastPhase;
+    private GamePhases currPhase;
+    private OwnPlayerPile currPlayerPile;
+    private OwnBank currBankPile;
+    private OwnProperty currPropertyPile;
+    private ActionPile actionPile;
+    private DrawPile drawPile;
+    private DrawPile discardPile;
+    // TODO 添加2~5人玩家的功能
+    private boolean isPause;
+    private boolean isSelected;
+    private boolean isPhaseOver;
+    private boolean isActionPhase;
+    private boolean isSelectCards;
 
-    public MDCGame(KeysListener keysListener, MousesListener mousesListener) {
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public MDCGame(KeysListener keysListener, MousesListener mousesListener, Config config) {
+        this.config = config;
         this.keysListener = keysListener;
         this.mousesListener = mousesListener;
-        startState();
+        // TODO 优化初始化
     }
 
     @Override
     public void startState() {
-        ifPause = true;
-        playerLives = 3;
-        playerScore = 0;
-        currentLevel = 0;
-        scoreCounter = 0;
-        levels = new Level[LEVELS];
-        levels[0] = new Level(1.00, 1, 20);
-        levels[1] = new Level(1.05, 2, 20);
-        levels[2] = new Level(1.10, 3, 20);
-        levels[3] = new Level(1.15, 4, 20);
-        levels[4] = new Level(1.20, 4, 18);
-        levels[5] = new Level(1.25, 4, 16);
-        levels[6] = new Level(1.30, 4, 14);
-        levels[7] = new Level(1.35, 4, 12);
-        levels[8] = new Level(1.40, 4, 10);
-        levels[9] = new Level(1.45, 4, 8);
-        levels[10] = new Level(1.50, 4, 6);
-        levels[11] = new Level(1.55, 4, 5);
-        levels[12] = new Level(1.60, 4, 5);
-        levels[13] = new Level(1.60, 4, 5);
-        pacMan = levels[currentLevel].pacMan;
-        ghosts = levels[currentLevel].ghosts;
-        ghostsPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-        targetsPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-        pacMansPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-        currentTime = 0;
+        this.isPause = true;
+        this.currTime = 0;
+        this.currPlayer = 0;
+        this.currCard = -1;
+        this.lastPhase = null;
+        this.buttonState = ButtonStates.NORMAL;
+        this.gameButton = GameButtons.NULL;
+        this.currPhase = GamePhases.drawCards;
+        this.playerNum = 5;
+        this.roundNum = 1;
+        this.players = new Player[playerNum];
+        this.isPhaseOver = false;
+        this.isActionPhase = false;
+        createPlayers();
+        createPiles();
     }
 
     @Override
     public void updateState() {
+        checkForPause();
         if (!isPaused()) {
-            currentTime++;
-            checkForSkip();
-            checkForScore();
-            setResurrection();
-            setPowerful();
-            setRandom();
-            setEaten();
-            movePacMan();
-            eatDot();
-            eatFruit();
-            eatPowerPellet();
-            eatPacMan();
-            eatGhosts();
+            listenerController();
+            phaseController();
+            currTime++;
         }
     }
 
     @Override
     public int getScreenWidth() {
-        return SCREEN_WIDTH;
+        return GameScreen.SCREEN_WIDTH;
     }
 
     @Override
     public int getScreenHeight() {
-        return SCREEN_HEIGHT;
+        return GameScreen.SCREEN_HEIGHT;
+    }
+
+    public int getCurrCard() {
+        return currCard;
+    }
+
+    public Player getCurrPlayer() {
+        return players[currPlayer];
+    }
+
+    public Player[] getPlayers() {
+        return players;
+    }
+
+    public int getDrawPileNum() {
+        return this.drawPile.size();
+    }
+
+    public GameButtons getGameButton() {
+        return gameButton;
+    }
+
+    public ButtonStates getButtonState() {
+        return buttonState;
+    }
+
+    public GamePhases getCurrPhase() {
+        return currPhase;
+    }
+
+    private void createPlayers() {
+        // 手牌堆、银行牌堆、房产牌堆顺带创建了
+        for (int i = 0; i < playerNum; i++) {
+            OwnPlayerPile playerPile = new OwnPlayerPile();
+            OwnBank bankPile = new OwnBank();
+            OwnProperty propertyPile = new OwnProperty();
+            players[i] = new Player(bankPile, propertyPile, playerPile);
+        }
+    }
+
+    private void createPiles() {
+        this.actionPile = new ActionPile();
+        // 加入抽牌堆
+        this.drawPile = new DrawPile();
+        createActionCards();
+        createMoneyCards();
+        createProperties();
+        createRentCards();
+        this.drawPile.shuffle();
+        // 加入弃牌堆
+        this.discardPile = new DrawPile();
+        // 设置当前玩家牌堆
+        this.currPlayerPile = players[currPlayer].getOwnPlayerPile();
+        this.currBankPile = players[currPlayer].getOwnBank();
+        this.currPropertyPile = players[currPlayer].getOwnProperty();
+    }
+
+    private void createActionCards() {
+        String packageName = "mdc.components.cards.actioncards.";
+        Config.GameInfo.ActionCards actionCardsInfo = config.getGameInfo().getActionCards();
+        Field[] fields = Config.GameInfo.ActionCards.class.getDeclaredFields(); // 使用映射
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                String[] info = field.get(actionCardsInfo).toString().split(" "); // 获取映射中config的数据
+                String className = packageName + field.getName(); // 类名和字段名相同，所以直接使用field.getName()
+                Class<?> cardClass = Class.forName(className); // 加载类
+                for (int i = 0; i < Integer.parseInt(info[0]); i++) {
+                    AbstractActionCard card = (AbstractActionCard) cardClass.getConstructor(int.class).newInstance(Integer.parseInt(info[1])); // 创建卡牌对象
+                    this.drawPile.addCard(card); // 添加入卡牌
+                }
+            } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                     InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void createMoneyCards() {
+        String packageName = "mdc.components.cards.moneycards.";
+        Config.GameInfo.MoneyCards moneyCardsInfo = config.getGameInfo().getMoneyCards();
+        Field[] fields = Config.GameInfo.MoneyCards.class.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                int num = (int) field.get(moneyCardsInfo);
+                int moneyValue = Integer.parseInt(field.getName().substring(1, 2));
+                String className = packageName + "MoneyCard";
+                for (int i = 0; i < num; i++) {
+                    MoneyCard card = (MoneyCard) Class.forName(className).getConstructor(int.class).newInstance(moneyValue);
+                    this.drawPile.addCard(card);
+                }
+            } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                     InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void createProperties() {
+        Config.GameInfo.Properties propertiesInfo = config.getGameInfo().getProperties();
+        Field[] fields = Config.GameInfo.Properties.class.getDeclaredFields();
+        Map<Colors, String[]> colorInfo = new HashMap<>();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                String fieldName = field.getName();
+                if (fieldName.equals("multiColour")) { // 添加全色牌
+                    int num = (int) field.get(propertiesInfo);
+                    for (int i = 0; i < num; i++) this.drawPile.addCard(new Property());
+                } else if (fieldName.split("_").length == 1) { // 添加单色牌
+                    Colors color = Colors.valueOf(fieldName);
+                    String[] info = field.get(propertiesInfo).toString().split(" ");
+                    colorInfo.put(color, info);
+                    createPropertyCards(color, info);
+                } else if (fieldName.split("_").length == 2) { // 添加双色牌
+                    String[] colors = fieldName.split("_");
+                    String[] info = field.get(propertiesInfo).toString().split(" ");
+                    Colors color1 = Colors.valueOf(colors[0]);
+                    Colors color2 = Colors.valueOf(colors[1]);
+                    String[] info1 = colorInfo.get(color1);
+                    String[] info2 = colorInfo.get(color2);
+                    createPropertyWildCards(info, color1, color2, info1, info2);
+                }
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private Property createPropertyCard(Colors color, int[] values) {
+        String className = "mdc.components.cards.properties.Property";
+        Property card;
+        try {
+            Class<?> cardClass = Class.forName(className);
+            Constructor<?> constructor;
+            switch (values.length) {
+                case 3 -> {
+                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class);
+                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2]);
+                }
+                case 4 -> {
+                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class, int.class);
+                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2], values[3]);
+                }
+                case 5 -> {
+                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class, int.class, int.class);
+                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2], values[3], values[4]);
+                }
+                default -> throw new IllegalArgumentException("Invalid number of arguments for Property card");
+            }
+            return card;
+        } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
+                 InvocationTargetException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    private void createPropertyCards(Colors color, String[] info) {
+        int[] values = new int[info.length - 1];
+        for (int i = 1; i < info.length; i++) values[i - 1] = Integer.parseInt(info[i]);
+        for (int i = 0; i < Integer.parseInt(info[0]); i++) {
+            AbstractPropertyCard card = createPropertyCard(color, values);
+            this.drawPile.addCard(card);
+        }
+    }
+
+    private void createPropertyWildCards(String[] info, Colors color1, Colors color2, String[] info1, String[] info2) {
+        int[] values1 = new int[info1.length - 1];
+        for (int i = 1; i < info1.length; i++) values1[i - 1] = Integer.parseInt(info1[i]);
+        int[] values2 = new int[info2.length - 1];
+        for (int i = 1; i < info2.length; i++) values2[i - 1] = Integer.parseInt(info2[i]);
+
+        for (int i = 0; i < Integer.parseInt(info[0]); i++) {
+            Property card1 = createPropertyCard(color1, values1);
+            Property card2 = createPropertyCard(color2, values2);
+            PropertyWild card = new PropertyWild(Integer.parseInt(info[1]), card1, card2);
+            this.drawPile.addCard(card);
+        }
+    }
+
+    private void createRentCards() {
+        String className = "mdc.components.cards.actioncards.RentCard";
+        Config.GameInfo.RentCards rentCardsInfo = config.getGameInfo().getRentCards();
+        Field[] fields = Config.GameInfo.RentCards.class.getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                String fieldName = field.getName();
+                if (fieldName.equals("multiColour")) {
+                    String[] info = field.get(rentCardsInfo).toString().split(" ");
+                    for (int i = 0; i < Integer.parseInt(info[0]); i++) this.drawPile.addCard(new RentCard(Integer.parseInt(info[1])));
+                } else {
+                    String[] info = field.get(rentCardsInfo).toString().split(" ");
+                    String[] colors = field.getName().split("_");
+                    Colors color1 = Colors.valueOf(colors[0]);
+                    Colors color2 = Colors.valueOf(colors[1]);
+                    for (int i = 0; i < Integer.parseInt(info[0]); i++) {
+                        Class<?> cardClass = Class.forName(className);
+                        Constructor<?> constructor = cardClass.getConstructor(int.class, Colors.class, Colors.class);
+                        RentCard card = (RentCard) constructor.newInstance(Integer.parseInt(info[1]), color1, color2);
+                        this.drawPile.addCard(card);
+                    }
+                }
+
+            } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException |
+                     InvocationTargetException | InstantiationException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
+    private void runDrawCardsPhase() {
+        if (roundNum == 1) for (Player player : players) this.drawPile.deal(player, 5);
+        this.drawPile.deal(players[currPlayer], 2);
+        isPhaseOver = true;
+    }
+
+    private void runPlayCardsPhase() {
+        isPhaseOver = true;
+    }
+
+    private void runDiscardsPhase() {
+        if (currPlayerPile.size() > 7) {
+            if (!isSelected) {
+                isSelectCards = true;
+            } else {
+                if (mousesListener.getMousePoint() != null) {
+                    if (GameScreen.DISCARD_RECT.contains(mousesListener.getMousePoint())) {
+                        gameButton = GameButtons.DISCARD;
+                        if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
+                        else if (mousesListener.hasReleasedButton1()) {
+                            currPlayerPile.getCards().remove(currCard);// 移除卡牌
+                            currCard = currPlayerPile.size() - 1;
+                            isSelected = false;
+                        } else buttonState = ButtonStates.HOVER;
+                    } else if (GameScreen.CANCEL_RECT.contains(mousesListener.getMousePoint())) {
+                        gameButton = GameButtons.CANCEL;
+                        if (mousesListener.hasPressedButton1()) {
+                            buttonState = ButtonStates.PRESSED;
+                        } else if (mousesListener.hasReleasedButton1()) {
+                            isSelected = false;
+                            buttonState = ButtonStates.HOVER;
+                        } else {
+                            buttonState = ButtonStates.HOVER;
+                        }
+                    }
+
+                }
+            }
+        } else {
+            isPhaseOver = true;
+        }
+    }
+
+    private void runSelectCards() {
+        int currCards = getCurrPlayer().getOwnPlayerPile().size();
+        if (keysListener.hasPressedLeft()) currCard = (currCard == -1 || currCard == 0) ? currCards - 1 : currCard - 1;
+        else if (keysListener.hasPressedRight()) currCard = (currCard + 1) % currCards;
+
+        if (mousesListener.getMousePoint() != null) {
+            if (GameScreen.SELECT_RECT.contains(mousesListener.getMousePoint())) {
+                gameButton = GameButtons.SELECT;
+                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
+                else if (mousesListener.hasReleasedButton1()) {
+                    isSelected = true;
+                    isPhaseOver = true;
+                } else buttonState = ButtonStates.HOVER;
+            }
+        }
+    }
+
+    private void runActionPhase() {
+
     }
 
     @Override
-    public void buttonController() {
-
-    }
-
-    @Override
-    public int getPlayerScore() {
-        return playerScore;
-    }
-
-    @Override
-    public int getLives() {
-        return playerLives;
-    }
-
-    public int getCurrentLevel() {
-        return currentLevel + 1;
-    }
-
-    // The following methods are used to obtain each component rectangle
-    public List<Rectangle> getNormalWallsRect() {
-        return levels[currentLevel].getNormalWallsRect();
-    }
-
-    public List<Rectangle> getGhostWallsRect() {
-        return levels[currentLevel].getGhostWallsRect();
-    }
-
-    public List<Rectangle> getDotsRect() {
-        return levels[currentLevel].getDotsRect();
-    }
-
-    public List<Rectangle> getFruitsRect() {
-        if (currentTime > 500 && currentTime < 2000) {
-            return levels[currentLevel].getFruitsRect();
+    public void listenerController() {
+        if (keysListener.hasPressedUp()) {
+            switch (currPhase) {
+                case playCards, discardCards, actionPhase -> isPhaseOver = true;
+            }
+        } else if (currPhase == GamePhases.playCards && keysListener.hasPressedDown()) {
+            isActionPhase = true;
         }
-        return null;
     }
 
-    public List<Rectangle> getPowerPelletsRect() {
-        return levels[currentLevel].getPowerPelletsRect();
-    }
-
-    public Rectangle getPacManGraphicRect() {
-        return pacMan.getGraphicRect();
-    }
-
-    public List<Rectangle> getGhostsGraphicRect() {
-        List<Rectangle> graphicRects = new ArrayList<>();
-        for (Ghost ghost : ghosts) {
-            graphicRects.add(ghost.getGraphicRect());
+    private void phaseController() {
+        if (isActionPhase) {
+            isActionPhase = false; // 防止重复设置phase
+            this.lastPhase = GamePhases.valueOf(currPhase.toString());
+            this.currPhase = GamePhases.actionPhase;
+        } else if (isSelectCards) {
+            isSelectCards = false;
+            this.lastPhase = GamePhases.valueOf(currPhase.toString());
+            this.currPhase = GamePhases.selectCards;
+        } else {
+            switch (currPhase) {
+                case drawCards -> {
+                    if (isPhaseOver) {
+                        currCard = -1;
+                        currPhase = GamePhases.playCards;
+                        isPhaseOver = false;
+                    } else runDrawCardsPhase();
+                }
+                case playCards -> {
+                    if (isPhaseOver) {
+                        currCard = -1;
+                        currPhase = GamePhases.discardCards;
+                        isPhaseOver = false;
+                    } else runPlayCardsPhase();
+                }
+                case discardCards -> {
+                    if (isPhaseOver) {
+                        moveToNextPlayer(); // 转移到下一玩家
+                        currPhase = GamePhases.drawCards;
+                        isPhaseOver = false;
+                    } else runDiscardsPhase();
+                }
+                case actionPhase -> {
+                    if (isPhaseOver) {
+                        currPhase = GamePhases.valueOf(lastPhase.toString());
+                        isPhaseOver = false;
+                    } else runActionPhase();
+                }
+                case selectCards -> {
+                    if (isPhaseOver) {
+                        currPhase = GamePhases.valueOf(lastPhase.toString());
+                        isPhaseOver = false;
+                    } else runSelectCards();
+                }
+            }
         }
-        return graphicRects;
-    }
-
-    private List<Rectangle> getGhostsHitboxRect() {
-        List<Rectangle> ghostsRect = new ArrayList<>();
-        for (Ghost ghost : ghosts) {
-            ghostsRect.add(ghost.getHitBox());
-        }
-        return ghostsRect;
-    }
-
-    private void getWallsForPlayer() {
-        wallsForPlayer = getNormalWallsRect();
-        wallsForPlayer.addAll(getGhostWallsRect());
     }
 
     /**
@@ -216,257 +456,31 @@ public class MDCGame implements State, Game {
 
     @Override
     public boolean isPaused() {
-        return ifPause;
-    }
-
-    @Override
-    public boolean isPlayerAlive() {
-        return pacMan.isAlive();
-    }
-
-    @Override
-    public boolean isLevelFinished() {
-        if (currentLevel < LEVELS) {
-            return levels[currentLevel].dots.size() == 0 &&
-                    levels[currentLevel].powerPellets.size() == 0;
-        } else {
-            return true;
-        }
+        return isPause;
     }
 
     @Override
     public boolean isStateOver() {
-        if (!(playerLives > 0)) {
-            return true;
-        } else return currentLevel == LEVELS - 1 && isLevelFinished();
+        return isPause && keysListener.hasPressedExit(); // 暂停时按esc退出
     }
 
     @Override
     public void checkForPause() {
-        if (keysListener.hasPressedExit()) {
-            ifPause = !ifPause;
-        }
+        if (!isPause && keysListener.hasPressedExit()) isPause = true; // 按esc暂停
+        else if (isPause && keysListener.hasPressedEnter()) isPause = false; // 按enter取消暂停
     }
 
-    /**
-     * This method is used to skip the current level for testing
-     */
-    private void checkForSkip() {
-        if (keysListener.hasPressedEnter()) {
-            if (currentLevel < LEVELS - 1) {
-                moveToNextLevel();
-            } else {
-                playerLives = 0;
-            }
-        }
-    }
-
-    /**
-     * This method is used to determine whether the current score is a multiple of 10000 and add player lives
-     */
-    private void checkForScore() {
-        if (scoreCounter >= 10000) {
-            scoreCounter = playerScore % 10000;
-            playerLives++;
-        }
-    }
-
-    @Override
-    public void resetDestroyedPlayer() {
-        levels[currentLevel].resetPacMan();
-        levels[currentLevel].resetGhosts();
-        pacMan = levels[currentLevel].pacMan;
-        ghosts = levels[currentLevel].ghosts;
-        ghostsPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-        targetsPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-        pacMansPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
-    }
-
-    @Override
-    public void moveToNextLevel() {
-        ifPause = true;
-        if (currentLevel < LEVELS - 1) {
-            currentLevel++;
-            currentTime = 0;
-        }
-        resetDestroyedPlayer();
+    public void moveToNextPlayer() {
+        roundNum += 1;
+        currPlayer = (currPlayer + 1) % playerNum;
+        currPlayerPile = players[currPlayer].getOwnPlayerPile();
+        currBankPile = players[currPlayer].getOwnBank();
+        currPropertyPile = players[currPlayer].getOwnProperty();
     }
 
     @Override
     public void moveToOtherStates() {
         keysListener.resetKeyPresses();
         mousesListener.resetMousePressed();
-    }
-
-    /**
-     * This method control the player's movement. When the player presses the direction key, judge whether there is a wall in front of it, and if not, move forward.
-     */
-    public void movePacMan() {
-        if (keysListener.hasPressedUp()) {
-            Rectangle newRect = new Rectangle(pacMan.getX(), pacMan.getY() - 2, 40, 40);
-            if (getIntersecting(newRect, wallsForPlayer) == -1) {
-                pacMan.move(0, -4);
-            }
-        }
-        if (keysListener.hasPressedDown()) {
-            Rectangle newRect = new Rectangle(pacMan.getX(), pacMan.getY() + 2, 40, 40);
-            if (getIntersecting(newRect, wallsForPlayer) == -1) {
-                pacMan.move(0, 4);
-            }
-        }
-        if (keysListener.hasPressedRight()) {
-            Rectangle newRect = new Rectangle(pacMan.getX() + 2, pacMan.getY(), 40, 40);
-            if (getIntersecting(newRect, wallsForPlayer) == -1) {
-                pacMan.move(4, 0);
-            }
-        }
-        if (keysListener.hasPressedLeft()) {
-            Rectangle newRect = new Rectangle(pacMan.getX() - 2, pacMan.getY(), 40, 40);
-            if (getIntersecting(newRect, wallsForPlayer) == -1) {
-                pacMan.move(-4, 0);
-            }
-        }
-
-    }
-
-    /**
-     * This method control the ghosts' movement.
-     *
-     * <p>Since the moving distance of ghost is not an integer, forced movement will be performed here. When the coordinates of the ghost's upper left corner are within the range of four pixels in the upper left corner of its block, it is judged that it has reached the point, and the next adjacent point is obtained at the same time.
-     *
-     * @param ghostIndex The index of the currently controlled ghost
-     * @param targetPos  The next adjacent point of the currently controlled ghost
-     */
-
-    /**
-     * The shortest path is obtained through breadth first search algorithm, and the next nearest point (target point) from the current coordinate is obtained
-     */
-
-
-    /**
-     * Action mode when ghost chasing player. At this time, the finishing point of the ghost is player's point.
-     */
-
-
-    /**
-     * Random action mode. At this time, the finishing point of the ghost is random.
-     */
-
-
-    /**
-     * Action mode when ghosts was eaten players. At this time, the finishing point of the ghost is its rebirth point
-     */
-
-
-    /**
-     * General control of ghost movement
-     */
-
-
-    // The following methods are related to eating
-    public void eatPacMan() {
-        int ghostIndex = getIntersecting(pacMan.getHitBox(), this.getGhostsHitboxRect());
-        if (ghostIndex != -1) {
-            if (!ghosts.get(ghostIndex).ifPowerless && !ghosts.get(ghostIndex).ifEaten) {
-                playerLives--;
-                if (playerLives > 0) {
-                    resetDestroyedPlayer();
-                }
-                ifPause = true;
-            }
-        }
-    }
-
-    public void eatGhosts() {
-        for (Ghost ghost : ghosts) {
-            if (pacMan.ifPowerful && ghost.ifPowerless) {
-                int ghostIndex = getIntersecting(pacMan.getHitBox(), this.getGhostsHitboxRect());
-                if (ghostIndex != -1 && !ghosts.get(ghostIndex).ifEaten) {
-                    ghosts.get(ghostIndex).ifEaten = true;
-                    pacMan.eatenNumber++;
-                    switch (pacMan.eatenNumber) {
-                        case 1 -> {
-                            playerScore += 200;
-                            scoreCounter += 200;
-                        }
-                        case 2 -> {
-                            playerScore += 400;
-                            scoreCounter += 400;
-                        }
-                        case 3 -> {
-                            playerScore += 800;
-                            scoreCounter += 800;
-                        }
-                        case 4 -> {
-                            playerScore += 1600;
-                            scoreCounter += 1600;
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private void eatDot() {
-        int dotIndex = getIntersecting(pacMan.getHitBox(), this.getDotsRect());
-        if (dotIndex != -1) {
-            playerScore += 10;
-            scoreCounter += 10;
-            levels[currentLevel].removeDot(dotIndex);
-        }
-    }
-
-    private void eatFruit() {
-        if (this.getFruitsRect() != null) {
-            int fruitIndex = getIntersecting(pacMan.getHitBox(), this.getFruitsRect());
-            if (fruitIndex != -1) {
-                playerScore += 500;
-                scoreCounter += 500;
-                levels[currentLevel].removeFruit(fruitIndex);
-            }
-        }
-    }
-
-    private void eatPowerPellet() {
-        int powerPelletIndex = getIntersecting(pacMan.getHitBox(), this.getPowerPelletsRect());
-        if (powerPelletIndex != -1) {
-            playerScore += 50;
-            scoreCounter += 50;
-            pacMan.powerfulTime = 300;
-            pacMan.ifPowerful = true;
-            pacMan.eatenNumber = 0;
-            for (Ghost ghost : ghosts) {
-                ghost.powerlessTime = 300;
-                ghost.ifPowerless = true;
-                ghost.randomTime = 0;
-            }
-            levels[currentLevel].removePowerPellet(powerPelletIndex);
-        }
-    }
-
-    // The following methods are related to the state of players and ghosts
-    private void setPowerful() {
-        pacMan.setIfPowerful();
-        for (Ghost ghost : ghosts) {
-            ghost.setIfPowerless();
-        }
-    }
-
-    private void setResurrection() {
-        for (Ghost ghost : ghosts) {
-            ghost.setIfResurrection();
-        }
-    }
-
-    private void setRandom() {
-        for (Ghost ghost : ghosts) {
-            ghost.setIfRandom();
-        }
-    }
-
-    private void setEaten() {
-        for (Ghost ghost : ghosts) {
-            ghost.setIfEaten();
-        }
     }
 }

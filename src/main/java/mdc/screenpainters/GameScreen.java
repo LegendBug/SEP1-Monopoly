@@ -1,218 +1,188 @@
 package mdc.screenpainters;
 
+import mdc.components.cards.ICard;
+import mdc.components.cards.actioncards.AbstractActionCard;
+import mdc.components.cards.actioncards.RentCard;
+import mdc.components.cards.moneycards.MoneyCard;
+import mdc.components.cards.properties.AbstractPropertyCard;
+import mdc.components.players.Player;
+import mdc.states.ButtonStates;
+import mdc.states.game.GameButtons;
+import mdc.states.game.GamePhases;
+import mdc.tools.Config;
 import mdc.tools.GraphPainter;
 import mdc.states.game.MDCGame;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
+import java.util.List;
 
 /**
  * This class is used to draw components on game screen
  */
 public class GameScreen extends JPanel {
+
+    public static final int SCREEN_WIDTH = MenuScreen.SCREEN_WIDTH;
+    public static final int SCREEN_HEIGHT = MenuScreen.SCREEN_HEIGHT;
+    private static final int CARD_WIDTH = SCREEN_WIDTH * 5 / 48;
+    private static final int CARD_HEIGHT = SCREEN_HEIGHT * 13 / 48;
+    private static final int INITIAL_DRAW_PILE_X = 0;
+    private static final int INITIAL_DRAW_PILE_Y = SCREEN_HEIGHT * 18 / 48 - 1;
+    public static final Rectangle BACKGROUND_RECT = new Rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    public static final Rectangle PLAY_RECT = new Rectangle(SCREEN_WIDTH  * 17 / 48, SCREEN_HEIGHT * 32 / 48, SCREEN_WIDTH  * 5 / 48, SCREEN_HEIGHT * 3 / 48);
+    public static final Rectangle DISCARD_RECT = new Rectangle(SCREEN_WIDTH  * 17 / 48, SCREEN_HEIGHT * 32 / 48, SCREEN_WIDTH  * 5 / 48, SCREEN_HEIGHT * 3 / 48);
+    public static final Rectangle SELECT_RECT = new Rectangle(SCREEN_WIDTH  * 21 / 48, SCREEN_HEIGHT * 32 / 48, SCREEN_WIDTH  * 5 / 48, SCREEN_HEIGHT * 3 / 48);
+    public static final Rectangle CANCEL_RECT = new Rectangle(SCREEN_WIDTH  * 26 / 48, SCREEN_HEIGHT * 32 / 48, SCREEN_WIDTH  * 5 / 48, SCREEN_HEIGHT * 3 / 48);
+
     private final MDCGame game;
+    public final Image desktop;
+    public final Image actionCard;
+    public final Image moneyCard;
+    public final Image propertyCard;
+    public final Image cardBack;
+    public final Image play1;
+    public final Image play2;
+    public final Image play3;
+    public final Image discard1;
+    public final Image discard2;
+    public final Image discard3;
+    public final Image select1;
+    public final Image select2;
+    public final Image select3;
+    public final Image cancel1;
+    public final Image cancel2;
+    public final Image cancel3;
+
     private Color color;
 
-    public GameScreen(MDCGame game) {
+    public GameScreen(MDCGame game, Config config) throws IOException {
         this.game = game;
+        desktop = GraphPainter.getImage(config.getImagePath().getDesktop());
+        actionCard = GraphPainter.getImage(config.getImagePath().getActionCard());
+        moneyCard = GraphPainter.getImage(config.getImagePath().getMoneyCard());
+        propertyCard = GraphPainter.getImage(config.getImagePath().getPropertyCard());
+        cardBack = GraphPainter.getImage(config.getImagePath().getCardBack());
+        play1 = GraphPainter.getImage(config.getImagePath().getPlay1());
+        play2 = GraphPainter.getImage(config.getImagePath().getPlay2());
+        play3 = GraphPainter.getImage(config.getImagePath().getPlay3());
+        discard1 = GraphPainter.getImage(config.getImagePath().getDiscard1());
+        discard2 = GraphPainter.getImage(config.getImagePath().getDiscard2());
+        discard3 = GraphPainter.getImage(config.getImagePath().getDiscard3());
+        select1 = GraphPainter.getImage(config.getImagePath().getSelect1());
+        select2 = GraphPainter.getImage(config.getImagePath().getSelect2());
+        select3 = GraphPainter.getImage(config.getImagePath().getSelect3());
+        cancel1 = GraphPainter.getImage(config.getImagePath().getCancel1());
+        cancel2 = GraphPainter.getImage(config.getImagePath().getCancel2());
+        cancel3 = GraphPainter.getImage(config.getImagePath().getCancel3());
     }
 
-    private void drawBackground(Graphics g) {
-        g.setColor(Color.BLACK);
-        g.fillRect(0, 0, MDCGame.SCREEN_WIDTH, MDCGame.SCREEN_HEIGHT);
-
+    private void drawInfo(Graphics2D g2d) {
+        GraphPainter.drawString(g2d, "player:" + game.currPlayer, "Courier New", 1, SCREEN_HEIGHT / 32, Color.WHITE, 0,
+                new Rectangle(SCREEN_WIDTH * 40 / 48, SCREEN_HEIGHT * 20 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "phase:" + game.getCurrPhase(), "Courier New", 1, SCREEN_HEIGHT / 32, Color.WHITE, 0,
+                new Rectangle(SCREEN_WIDTH * 40 / 48, SCREEN_HEIGHT * 21 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "draw pile:" + game.getDrawPileNum(), "Courier New", 1, SCREEN_HEIGHT / 32, Color.WHITE, 0,
+                new Rectangle(SCREEN_WIDTH * 40 / 48, SCREEN_HEIGHT * 22 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "curr card:" + game.getCurrCard(), "Courier New", 1, SCREEN_HEIGHT / 32, Color.WHITE, 0,
+                new Rectangle(SCREEN_WIDTH * 40 / 48, SCREEN_HEIGHT * 23 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "curr cards:" + game.getCurrPlayer().getOwnPlayerPile().size(), "Courier New", 1, SCREEN_HEIGHT / 32, Color.WHITE, 0,
+                new Rectangle(SCREEN_WIDTH * 40 / 48, SCREEN_HEIGHT * 24 / 48, 200, 100));
     }
 
-    private void drawNormalWalls(Graphics g) {
-        for (Rectangle normalWallRect : game.getNormalWallsRect()) {
-            GraphPainter.drawRectangle(g, Color.BLUE, normalWallRect);
-        }
+
+
+    private void drawBackground(Graphics2D g2d) throws IOException {
+        GraphPainter.drawImage(g2d, desktop, BACKGROUND_RECT, false);
     }
 
-    private void drawGhostWalls(Graphics g) {
-        for (Rectangle ghostWallRect : game.getGhostWallsRect()) {
-            GraphPainter.drawRectangle(g, Color.DARK_GRAY, ghostWallRect);
-        }
-    }
-
-    private void drawDots(Graphics g) {
-        for (Rectangle dotRect : game.getDotsRect()) {
-            GraphPainter.drawRectangle(g, Color.WHITE, dotRect);
-        }
-    }
-
-    private void drawFruit(Graphics g) {
-        if (game.getFruitsRect() != null) {
-            // Here is a simple drawing of an apple
-            for (Rectangle fruitRect : game.getFruitsRect()) {
-                GraphPainter.drawRectangle(g, Color.GRAY, new Rectangle(fruitRect.x + 18, fruitRect.y + 4, 3, 14));
-                int[] xPoints = new int[] {5, 16, 19, 23, 34, 39, 31, 22, 20, 19, 8, 0};
-                int[] yPoints = new int[] {10, 10, 16, 10, 10, 20, 39, 39, 35, 39, 39, 20};
-                for (int i = 0; i < xPoints.length; i++) {
-                    xPoints[i] = fruitRect.x + xPoints[i];
-                    yPoints[i] = fruitRect.y + yPoints[i];
-                }
-                GraphPainter.drawPolygon(g, Color.RED, xPoints, yPoints, 12);
+    private void drawButtonState(Graphics2D g2d, GameButtons button, Rectangle rect, Image image1, Image image2, ButtonStates state) throws IOException {
+        switch (state) {
+            case HOVER -> {
+                if (game.getGameButton() == button)
+                    GraphPainter.drawImage(g2d, image1, rect, false);
+            }
+            case PRESSED -> {
+                if (game.getGameButton() == button)
+                    GraphPainter.drawImage(g2d, image2, rect, false);
             }
         }
     }
 
-    private void drawPowerPellets(Graphics g) {
-        for (Rectangle powerPellets : game.getPowerPelletsRect())
-            GraphPainter.drawOval(g, Color.YELLOW, powerPellets.x, powerPellets.y, powerPellets.width, powerPellets.height);
-    }
-
-    private void drawPacMan(Graphics g) {
-        Rectangle rect = game.getPacManGraphicRect();
-        int direction = game.pacMan.mouthDirection;
-        int range = game.pacMan.mouthRange;
-        GraphPainter.drawAct(g, Color.YELLOW, rect.x, rect.y, rect.width, rect.height, direction * 90 + range, 360 - 2 * range);
-    }
-
-    private void drawGhostBody(Graphics g, Color color, Rectangle ghostRect, int hemlineNumber) {
-        // 头部
-        GraphPainter.drawAct(g, color, ghostRect.x, ghostRect.y, ghostRect.width, ghostRect.height, 0, 180);
-        GraphPainter.drawRectangle(g, color, new Rectangle(ghostRect.x, ghostRect.y + 20, 40, 16));
-        // 腿部
-        switch (hemlineNumber) {
-            case 2 -> {
-                for (int number = 0; number < hemlineNumber; number++) {
-                    GraphPainter.drawAct(g, color, ghostRect.x + 20 * number, ghostRect.y + 22, 20, 20, 180, 360);
+    private void drawButton(Graphics2D g2d) throws  IOException {
+        GamePhases phase = game.getCurrPhase();
+        ButtonStates state = game.getButtonState();
+        if (game.getCurrCard() != -1) {
+            switch (phase) {
+                case playCards -> {
+                    GraphPainter.drawImage(g2d, play1, PLAY_RECT, false);
+                    GraphPainter.drawImage(g2d, cancel1, CANCEL_RECT, false);
+                    drawButtonState(g2d, GameButtons.PLAY, PLAY_RECT, play2, play3, state);
+                    drawButtonState(g2d, GameButtons.CANCEL, CANCEL_RECT, cancel2, cancel3, state);
                 }
-            }
-            case 3 -> {
-                for (int number = 0; number < hemlineNumber; number++) {
-                    GraphPainter.drawAct(g, color, ghostRect.x + 13 * number, ghostRect.y + 27, 13, 13, 180, 360);
+                case discardCards -> {
+                    GraphPainter.drawImage(g2d, discard1, DISCARD_RECT, false);
+                    GraphPainter.drawImage(g2d, cancel1, CANCEL_RECT, false);
+                    drawButtonState(g2d, GameButtons.DISCARD, DISCARD_RECT, discard2, discard3, state);
+                    drawButtonState(g2d, GameButtons.CANCEL, CANCEL_RECT, cancel2, cancel3, state);
                 }
-            }
-            case 4 -> {
-                for (int number = 0; number < hemlineNumber; number++) {
-                    GraphPainter.drawAct(g, color, ghostRect.x + 10 * number, ghostRect.y + 30, 10, 10, 180, 360);
-                }
-            }
-            case 5 -> {
-                for (int number = 0; number < hemlineNumber; number++) {
-                    GraphPainter.drawAct(g, color, ghostRect.x + 8 * number, ghostRect.y + 32, 8, 8, 180, 360);
+                case selectCards -> {
+                    GraphPainter.drawImage(g2d, select1, SELECT_RECT, false);
+                    drawButtonState(g2d, GameButtons.SELECT, SELECT_RECT, select2, select3, state);
                 }
             }
         }
     }
 
-    private void drawGhostEyes(Graphics g, Rectangle ghostRect, int direction) {
-        // 眼眶
-        GraphPainter.drawOval(g, Color.WHITE, ghostRect.x + 6, ghostRect.y + 9, 11, 11);
-        GraphPainter.drawOval(g, Color.WHITE, ghostRect.x + 23, ghostRect.y + 9, 11, 11);
-        // 眼珠
-        switch (direction) {
-            case 1 -> {
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 8, ghostRect.y + 9, 7, 7);
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 25, ghostRect.y + 9, 7, 7);
-            }
-            case 2 -> {
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 6, ghostRect.y + 11, 7, 7);
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 23, ghostRect.y + 11, 7, 7);
-            }
-            case 3 -> {
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 8, ghostRect.y + 13, 7, 7);
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 25, ghostRect.y + 13, 7, 7);
-            }
-            case 4 -> {
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 10, ghostRect.y + 11, 7, 7);
-                GraphPainter.drawOval(g, Color.BLACK, ghostRect.x + 27, ghostRect.y + 11, 7, 7);
-            }
+
+    private void drawDrawPile(Graphics2D g2d) throws IOException {
+        int num = Math.min(game.getDrawPileNum(), 10);
+        for (int i = 0; i < num; i++) {
+            Rectangle rect = new Rectangle(INITIAL_DRAW_PILE_X + 5 * i, INITIAL_DRAW_PILE_Y, CARD_WIDTH, CARD_HEIGHT);
+            GraphPainter.drawImage(g2d, cardBack, rect, false);
         }
     }
 
-    /**
-     *Every ghost has three states: normal, frightened (powerless) and eaten
-     */
-    private void drawGhosts(Graphics g) {
-        for (int i = game.getGhostsGraphicRect().size() - 1; i >= 0; i--) {
-            Rectangle ghostRect = game.getGhostsGraphicRect().get(i);
-            int direction = game.ghosts.get(i).direction;
-            int hemlineNumber = game.ghosts.get(i).hemlineNumber;
-            if (game.ghosts.get(i).ifEaten) {
-                // eaten
-                drawGhostEyes(g, ghostRect, direction);
+    private void drawDiscardPile(Graphics2D g2d) throws IOException {
+        // TODO 画弃牌堆
+    }
+
+    private void drawCurrentPlayerPile(Graphics2D g2d) throws IOException {
+        Player currPlayer = game.getCurrPlayer();
+        List<ICard> cards = currPlayer.getOwnPlayerPile().getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            int addHeight = (i == game.getCurrCard() && game.isSelected()) ? CARD_HEIGHT * 2 / 3 : 0;
+            boolean toBeSelected = (i == game.getCurrCard() && addHeight == 0);
+            Rectangle rect = new Rectangle((CARD_WIDTH / 3) * i, SCREEN_HEIGHT - CARD_HEIGHT - addHeight, CARD_WIDTH, CARD_HEIGHT);
+            ICard card = cards.get(i);
+            Image cardImage;
+            if (card instanceof RentCard) {
+                cardImage = actionCard;
+            } else if (card instanceof AbstractActionCard) {
+                cardImage = actionCard;
+            } else if (card instanceof MoneyCard) {
+                cardImage = moneyCard;
+            } else if (card instanceof AbstractPropertyCard) {
+                cardImage = propertyCard;
             } else {
-                if (game.ghosts.get(i).ifPowerless) {
-                    // frightened
-                    if (game.pacMan.powerfulTime < 100 && game.pacMan.powerfulTime % 6 / 3 == 1) {
-                        color = Color.LIGHT_GRAY;
-                    } else {
-                        color = Color.BLUE;
-                    }
-                    drawGhostBody(g, color, ghostRect, hemlineNumber);
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 10, ghostRect.y + 15, 5, 5));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 25, ghostRect.y + 15, 5, 5));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 3, ghostRect.y + 29, 2, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 5, ghostRect.y + 27, 6, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 11, ghostRect.y + 29, 6, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 17, ghostRect.y + 27, 6, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 23, ghostRect.y + 29, 6, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 29, ghostRect.y + 27, 6, 2));
-                    GraphPainter.drawRectangle(g, Color.WHITE, new Rectangle(ghostRect.x + 35, ghostRect.y + 29, 2, 2));
-                } else {
-                    // normal
-                    switch (i) {
-                        case 0 -> color = Color.RED;
-                        case 1 -> color = Color.PINK;
-                        case 2 -> color = Color.CYAN;
-                        case 3 -> color = Color.ORANGE;
-                    }
-                    drawGhostBody(g, color, ghostRect, hemlineNumber);
-                    drawGhostEyes(g, ghostRect, direction);
-                }
+                continue;
             }
+            GraphPainter.drawImage(g2d, cardImage, rect, toBeSelected);
         }
     }
 
-    private void drawString(Graphics g) {
-        // Current level
-        GraphPainter.drawString(g, "Level:", "Courier New", 1, 30, Color.WHITE, 0,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 810 / 960, MDCGame.SCREEN_HEIGHT * 50 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        GraphPainter.drawString(g, "" + game.getCurrentLevel(), "Courier New", 1, 30, Color.WHITE, 1,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 780 / 960, MDCGame.SCREEN_HEIGHT * 80 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        // score
-        GraphPainter.drawString(g, "Score:", "Courier New", 1, 30, Color.WHITE, 0,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 810 / 960, MDCGame.SCREEN_HEIGHT * 150 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        GraphPainter.drawString(g, "" + game.getPlayerScore(), "Courier New", 1, 30, Color.WHITE, 1,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 780 / 960, MDCGame.SCREEN_HEIGHT * 180 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        // lives
-        if (game.getLives() <= 1) {
-            color = Color.RED;
-        } else {
-            color = Color.WHITE;
-        }
-        GraphPainter.drawString(g, "Lives:", "Courier New", 1, 30, color, 0,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 810 / 960, MDCGame.SCREEN_HEIGHT * 250 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        GraphPainter.drawString(g, "" + game.getLives(), "Courier New", 1, 30, color, 1,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 780 / 960, MDCGame.SCREEN_HEIGHT * 280 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        // help
-        if (game.isPaused()) {
-            GraphPainter.drawString(g, "GAME PAUSE", "Courier New", 1, 100, Color.GREEN, 0,
-                    new Rectangle(MDCGame.SCREEN_WIDTH * 200 / 960, MDCGame.SCREEN_HEIGHT * 400 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-            GraphPainter.drawString(g, "Play ('P')", "Courier New", 1, 20, Color.RED, 0,
-                    new Rectangle(MDCGame.SCREEN_WIDTH * 840 / 960, MDCGame.SCREEN_HEIGHT * 930 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        } else {
-            GraphPainter.drawString(g, "Pause('P')", "Courier New", 1, 20, Color.WHITE, 0,
-                    new Rectangle(MDCGame.SCREEN_WIDTH * 840 / 960, MDCGame.SCREEN_HEIGHT * 930 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-        }
-        GraphPainter.drawString(g, "Skip ('S')", "Courier New", 1, 20, Color.WHITE, 0,
-                new Rectangle(MDCGame.SCREEN_WIDTH * 840 / 960, MDCGame.SCREEN_HEIGHT * 900 / 960, MDCGame.SCREEN_WIDTH / 6, MDCGame.SCREEN_HEIGHT * 80 / 960));
-    }
+
 
     protected void paintComponent(Graphics g) {
-        if (game != null) {
-            drawBackground(g);
-            drawNormalWalls(g);
-            drawGhostWalls(g);
-            drawDots(g);
-            drawFruit(g);
-            drawPowerPellets(g);
-            drawGhosts(g);
-            drawPacMan(g);
-            drawString(g);
+        Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            drawBackground(g2d);
+            drawInfo(g2d);
+            drawButton(g2d);
+            drawDrawPile(g2d);
+            drawCurrentPlayerPile(g2d);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

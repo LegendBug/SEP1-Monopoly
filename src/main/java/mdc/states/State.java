@@ -5,7 +5,7 @@ public interface State {
 
     int getScreenHeight();
 
-    void buttonController();
+    void listenerController();
 
     void startState();
 

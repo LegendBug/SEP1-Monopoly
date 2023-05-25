@@ -3,107 +3,117 @@ package mdc.states.menu;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
 import mdc.screenpainters.MenuScreen;
+import mdc.states.ButtonStates;
 import mdc.states.State;
-
-import java.awt.*;
+import mdc.tools.Config;
 
 public class MDCMenu implements State {
-    private static final int SCREEN_WIDTH = 960;
-    private static final int SCREEN_HEIGHT = 960;
+    private MenuButtons menuButton;
+    private ButtonStates buttonState;
+    private final Config config;
     private final KeysListener keysListener;
     private final MousesListener mousesListener;
-    private MenuItem menuItem;
 
-    public MDCMenu(KeysListener keysListener, MousesListener mousesListener) {
+    public MDCMenu(KeysListener keysListener, MousesListener mousesListener, Config config) {
+        this.config = config;
         this.keysListener = keysListener;
         this.mousesListener = mousesListener;
         startState();
     }
 
+    public MenuButtons getMenuButton() {
+        return menuButton;
+    }
+
+    public ButtonStates getButtonState() {
+        return buttonState;
+    }
+
     @Override
     public int getScreenWidth() {
-        return SCREEN_WIDTH;
+        return MenuScreen.SCREEN_WIDTH;
     }
 
     @Override
     public int getScreenHeight() {
-        return SCREEN_HEIGHT;
+        return MenuScreen.SCREEN_HEIGHT;
     }
 
-    private void nextItem() {
-        switch (menuItem) {
-            case GameScr -> menuItem = MenuItem.HelpScr;
-            case HelpScr -> menuItem = MenuItem.ScoreScr;
-            case ScoreScr -> menuItem = MenuItem.Exit;
-            case Exit -> menuItem = MenuItem.GameScr;
+    private void nextButton() {
+        switch (menuButton) {
+            case GameScr -> menuButton = MenuButtons.HistoryScr;
+            case HistoryScr -> menuButton = MenuButtons.Exit;
+            case Null, Exit -> menuButton = MenuButtons.GameScr;
         }
     }
 
-    private void prevItem() {
-        switch (menuItem) {
-            case GameScr -> menuItem = MenuItem.Exit;
-            case HelpScr -> menuItem = MenuItem.GameScr;
-            case ScoreScr -> menuItem = MenuItem.HelpScr;
-            case Exit -> menuItem = MenuItem.ScoreScr;
+    private void prevButton() {
+        switch (menuButton) {
+            case Null, GameScr -> menuButton = MenuButtons.Exit;
+            case HistoryScr -> menuButton = MenuButtons.GameScr;
+            case Exit -> menuButton = MenuButtons.HistoryScr;
         }
     }
 
-    public boolean isChosenScoreScr() {
-        return menuItem == MenuItem.ScoreScr;
-    }
-
-    public boolean isChosenHelpSrc() {
-        return menuItem == MenuItem.HelpScr;
+    public boolean isChosenHistorySrc() {
+        return menuButton == MenuButtons.HistoryScr;
     }
 
     public boolean isChosenGameSrc() {
-        return menuItem == MenuItem.GameScr;
+        return menuButton == MenuButtons.GameScr;
     }
 
     public boolean isChosenExit() {
-        return menuItem == MenuItem.Exit;
+        return menuButton == MenuButtons.Exit;
     }
 
     @Override
     public boolean isStateOver() {
         if (mousesListener.hasReleasedButton1()) {
-            return MenuScreen.NEW_GAME_RECT.contains(mousesListener.getMousePoint()) || MenuScreen.ABOUT_RECT.contains(mousesListener.getMousePoint())
-                    || MenuScreen.SCORE_RECT.contains(mousesListener.getMousePoint()) || MenuScreen.EXIT_RECT.contains(mousesListener.getMousePoint());
+            return MenuScreen.GAME_RECT.contains(mousesListener.getMousePoint())
+                    || MenuScreen.HISTORY_RECT.contains(mousesListener.getMousePoint())
+                    || MenuScreen.EXIT_RECT.contains(mousesListener.getMousePoint());
         }
+
         return keysListener.hasPressedEnter();
     }
 
     @Override
-    public void buttonController() {
+    public void listenerController() {
         if (keysListener.hasPressedUp()) {
-            prevItem();
-            System.out.println(menuItem);
+            prevButton();
+            buttonState = ButtonStates.HOVER;
         } else if (keysListener.hasPressedDown()) {
-            nextItem();
-            System.out.println(menuItem);
+            nextButton();
+            buttonState = ButtonStates.HOVER;
         }
 
         if (mousesListener.getMousePoint() != null) {
-            if (MenuScreen.NEW_GAME_RECT.contains(mousesListener.getMousePoint())) {
-                menuItem = MenuItem.GameScr;
-            } else if (MenuScreen.ABOUT_RECT.contains(mousesListener.getMousePoint())) {
-                menuItem = MenuItem.HelpScr;
-            } else if (MenuScreen.SCORE_RECT.contains(mousesListener.getMousePoint())) {
-                menuItem = MenuItem.ScoreScr;
+            if (MenuScreen.GAME_RECT.contains(mousesListener.getMousePoint())) {
+                menuButton = MenuButtons.GameScr;
+                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
+                else buttonState = ButtonStates.HOVER;
+            } else if (MenuScreen.HISTORY_RECT.contains(mousesListener.getMousePoint())) {
+                menuButton = MenuButtons.HistoryScr;
+                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
+                else buttonState = ButtonStates.HOVER;
             } else if (MenuScreen.EXIT_RECT.contains(mousesListener.getMousePoint())) {
-                menuItem = MenuItem.Exit;
+                menuButton = MenuButtons.Exit;
+                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
+                else buttonState = ButtonStates.HOVER;
             }
         }
     }
 
     @Override
     public void startState() {
-        menuItem = MenuItem.GameScr;
+        menuButton = MenuButtons.Null;
+        buttonState = ButtonStates.NORMAL;
     }
 
     @Override
     public void updateState() {
-        buttonController();
+        listenerController();
     }
 
     @Override
@@ -112,7 +122,4 @@ public class MDCMenu implements State {
         mousesListener.resetMousePressed();
     }
 
-    private enum MenuItem {
-        ScoreScr, HelpScr, GameScr, Exit
-    }
 }
