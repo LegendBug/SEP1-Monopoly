@@ -100,8 +100,6 @@ public class MDCGame implements State, Game {
         targetsPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
         pacMansPos = new ArrayList<>(Arrays.asList(new int[2], new int[2], new int[2], new int[2]));
         currentTime = 0;
-        getWallsForPlayer();
-        getRoadsForGhosts();
     }
 
     @Override
@@ -115,7 +113,6 @@ public class MDCGame implements State, Game {
             setRandom();
             setEaten();
             movePacMan();
-            moveGhosts();
             eatDot();
             eatFruit();
             eatPowerPellet();
@@ -200,11 +197,6 @@ public class MDCGame implements State, Game {
     private void getWallsForPlayer() {
         wallsForPlayer = getNormalWallsRect();
         wallsForPlayer.addAll(getGhostWallsRect());
-    }
-
-    private void getRoadsForGhosts() {
-        roadsForGhosts = levels[currentLevel].getRoadsPos();
-        map = new Graph(roadsForGhosts);
     }
 
     /**
@@ -345,123 +337,31 @@ public class MDCGame implements State, Game {
      * @param ghostIndex The index of the currently controlled ghost
      * @param targetPos  The next adjacent point of the currently controlled ghost
      */
-    public void moveGhost(int ghostIndex, int[] targetPos) {
-        // Judge whether to reach the target point (i.e. the coordinates of the upper left corner of the block)
-        if (targetPos[0] * 40 < ghosts.get(ghostIndex).getX() + 4 && targetPos[0] * 40 > ghosts.get(ghostIndex).getX() - 4 &&
-                targetPos[1] * 40 < ghosts.get(ghostIndex).getY() + 4 && targetPos[1] * 40 > ghosts.get(ghostIndex).getY() - 4) {
-            int[] initialPos = ghosts.get(ghostIndex).INITIAL_POS.get(0);
-            // If the point the ghost arrives at is the rebirth point, cancel all its negative states
-            if (Arrays.equals(targetPos, initialPos) && Arrays.equals(pacMansPos.get(ghostIndex), initialPos)) {
-                ghosts.get(ghostIndex).ifEaten = false;
-                ghosts.get(ghostIndex).ifPowerless = false;
-                ghosts.get(ghostIndex).powerlessTime = 0;
-            } else {
-                ghosts.get(ghostIndex).x = targetPos[0] * 40; // Forced moving coordinate
-                ghosts.get(ghostIndex).y = targetPos[1] * 40; // Forced moving coordinate
-                // Select a new neighboring coordinate, and keep moving
-                targetsPos.set(ghostIndex, getTargetsPos(ghostIndex, pacMansPos.get(ghostIndex)));
-                if (!Arrays.equals(targetsPos.get(ghostIndex), pacMansPos.get(ghostIndex))) {
-                    moveGhost(ghostIndex, targetsPos.get(ghostIndex));
-                }
-            }
-            // If not, move towards the target point
-        } else if (targetPos[0] == ghosts.get(ghostIndex).getX() / 40.0 && targetPos[1] * 40 < ghosts.get(ghostIndex).y) {
-            ghosts.get(ghostIndex).move(0, -levels[currentLevel].ghostsSpeed);
-        } else if (targetPos[0] == ghosts.get(ghostIndex).getX() / 40.0 && targetPos[1] * 40 > ghosts.get(ghostIndex).y) {
-            ghosts.get(ghostIndex).move(0, levels[currentLevel].ghostsSpeed);
-        } else if (targetPos[0] * 40 > ghosts.get(ghostIndex).x && targetPos[1] == ghosts.get(ghostIndex).getY() / 40.0) {
-            ghosts.get(ghostIndex).move(levels[currentLevel].ghostsSpeed, 0);
-        } else if (targetPos[0] * 40 < ghosts.get(ghostIndex).x && targetPos[1] == ghosts.get(ghostIndex).getY() / 40.0) {
-            ghosts.get(ghostIndex).move(-levels[currentLevel].ghostsSpeed, 0);
-        }
-    }
 
     /**
      * The shortest path is obtained through breadth first search algorithm, and the next nearest point (target point) from the current coordinate is obtained
      */
-    public int[] getTargetsPos(int ghostIndex, int[] pacManPos) {
-        int[] ghostPos = new int[2];
-        ghostPos[0] = ghosts.get(ghostIndex).getX() / 40 + ghosts.get(ghostIndex).getX() / 20 % 2;
-        ghostPos[1] = ghosts.get(ghostIndex).getY() / 40 + ghosts.get(ghostIndex).getY() / 20 % 2;
-        ghostsPos.set(ghostIndex, ghostPos);
-        int s = 0, w = 0; // Index of current point and target location
-        for (int i = 0; i < roadsForGhosts.size(); i++) { // get the index of current point
-            if (Arrays.equals(roadsForGhosts.get(i), ghostsPos.get(ghostIndex))) {
-                s = i;
-                break;
-            }
-        }
-        for (int i = 0; i < roadsForGhosts.size(); i++) {
-            if (Arrays.equals(roadsForGhosts.get(i), pacManPos)) {
-                w = i;
-                break;
-            }
-        }
-        BreadthFirstPaths bfs = new BreadthFirstPaths(map, s); // Breadth First Search
-        return roadsForGhosts.get(bfs.getNextPoint(w));
-    }
+
 
     /**
      * Action mode when ghost chasing player. At this time, the finishing point of the ghost is player's point.
      */
-    public void chaseMode(int ghostIndex) {
-        int[] pacManPos = new int[2];
-        pacManPos[0] = pacMan.getX() / 40 + pacMan.getX() / 20 % 2;
-        pacManPos[1] = pacMan.getY() / 40 + pacMan.getY() / 20 % 2;
-        pacMansPos.set(ghostIndex, pacManPos); // 写入
-        if (Arrays.equals(new int[]{0, 0}, targetsPos.get(ghostIndex))) {
-            targetsPos.set(ghostIndex, getTargetsPos(ghostIndex, pacMansPos.get(ghostIndex))); // 写入
-        }
-        moveGhost(ghostIndex, targetsPos.get(ghostIndex));
-    }
+
 
     /**
      * Random action mode. At this time, the finishing point of the ghost is random.
      */
-    public void randomMode(int ghostIndex) {
-        if (ghosts.get(ghostIndex).ifRandom) {
-            ghosts.get(ghostIndex).ifRandom = false;
-            pacMansPos.set(ghostIndex, roadsForGhosts.get((int) (Math.random() * roadsForGhosts.size())));
-            if (Arrays.equals(new int[]{0, 0}, targetsPos.get(ghostIndex))) {
-                targetsPos.set(ghostIndex, getTargetsPos(ghostIndex, pacMansPos.get(ghostIndex))); // 写入
-            }
-        } else {
-            if (Arrays.equals(targetsPos.get(ghostIndex), pacMansPos.get(ghostIndex))) {
-                pacMansPos.set(ghostIndex, roadsForGhosts.get((int) (Math.random() * roadsForGhosts.size())));
-            }
-        }
-        moveGhost(ghostIndex, targetsPos.get(ghostIndex));
-    }
+
 
     /**
      * Action mode when ghosts was eaten players. At this time, the finishing point of the ghost is its rebirth point
      */
-    public void eatenMode(int ghostIndex) {
-        pacMansPos.set(ghostIndex, ghosts.get(ghostIndex).INITIAL_POS.get(0));
-        moveGhost(ghostIndex, targetsPos.get(ghostIndex));
-    }
+
 
     /**
      * General control of ghost movement
      */
-    public void moveGhosts() {
-        for (int i = 0; i < ghosts.size(); i++) {
-            Ghost ghost = ghosts.get(i);
-            if (ghost.ifResurrection) {
-                if (ghost.ifPowerless) {
-                    if (ghost.ifEaten) {
-                        eatenMode(i);
-                    } else {
-                        randomMode(i); // 等Powerless自然结束
-                    }
-                } else if (i == 0) {
-                    chaseMode(i);
-                } else {
-                    randomMode(i);
-                }
-            }
-        }
-    }
+
 
     // The following methods are related to eating
     public void eatPacMan() {
