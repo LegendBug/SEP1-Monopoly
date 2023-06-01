@@ -9,13 +9,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <dependencies>
-        <dependency>
-            <groupId>engine</groupId>
-            <artifactId>engine</artifactId>
-            <version>1.0</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/libs/Engine.jar</systemPath>
-        </dependency>
 
         <dependency>
             <groupId>com.google.code.gson</groupId>

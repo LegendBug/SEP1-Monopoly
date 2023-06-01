@@ -1,6 +1,5 @@
 package mdc.models;
 
-import engine.ScoreKeeper;
 import mdc.engine.GameEngine;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
@@ -13,6 +12,7 @@ import mdc.states.menu.MDCMenu;
 import mdc.tools.Config;
 import mdc.tools.ConfigLoader;
 import mdc.tools.GraphPainter;
+import mdc.tools.ScoreKeeper;
 
 import javax.swing.*;
 import java.awt.*;

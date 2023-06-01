@@ -1,10 +1,10 @@
 package mdc.engine;
 
-import engine.ScoreKeeper;
 import mdc.states.game.MDCGame;
 import mdc.states.menu.MDCMenu;
 import mdc.states.history.MDCHistory;
 import mdc.tools.Config;
+import mdc.tools.ScoreKeeper;
 
 import javax.swing.*;
 import java.awt.*;

@@ -1,9 +1,9 @@
 package mdc.screenpainters;
 
 
-import engine.Score;
-import engine.ScoreKeeper;
 import mdc.tools.GraphPainter;
+import mdc.tools.Score;
+import mdc.tools.ScoreKeeper;
 
 import javax.swing.*;
 import java.awt.*;
