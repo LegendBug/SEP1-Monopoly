@@ -159,14 +159,14 @@ public class Config {
             private String pink;
             private String lightBlue;
             private String railRoad;
-            private String darkBlue_green;
+            private String green_darkBlue;
             private String green_railRoad;
-            private String utility_railRoad;
+            private String railRoad_utility;
             private String lightBlue_railRoad;
-            private String lightBlue_brown;
-            private String pink_orange;
-            private String red_yellow;
-            private int multiColour;
+            private String brown_lightBlue;
+            private String orange_pink;
+            private String yellow_red;
+            private int multiProperty;
 
             public String getDarkBlue() {
                 return darkBlue;
@@ -208,36 +208,36 @@ public class Config {
                 return railRoad;
             }
 
-            public String getDarkBlue_green() {
-                return darkBlue_green;
+            public String getGreen_darkBlue() {
+                return green_darkBlue;
             }
 
             public String getGreen_railRoad() {
                 return green_railRoad;
             }
 
-            public String getUtility_railRoad() {
-                return utility_railRoad;
+            public String getRailRoad_utility() {
+                return railRoad_utility;
             }
 
             public String getLightBlue_railRoad() {
                 return lightBlue_railRoad;
             }
 
-            public String getLightBlue_brown() {
-                return lightBlue_brown;
+            public String getBrown_lightBlue() {
+                return brown_lightBlue;
             }
 
-            public String getPink_orange() {
-                return pink_orange;
+            public String getOrange_pink() {
+                return orange_pink;
             }
 
-            public String getRed_yellow() {
-                return red_yellow;
+            public String getYellow_red() {
+                return yellow_red;
             }
 
-            public int getMultiColour() {
-                return multiColour;
+            public int getMultiProperty() {
+                return multiProperty;
             }
         }
 
@@ -247,7 +247,7 @@ public class Config {
             private String lightBlue_brown;
             private String pink_orange;
             private String red_yellow;
-            private String multiColour;
+            private String multiRent;
 
             public String getDarkBlue_green() {
                 return darkBlue_green;
@@ -269,8 +269,8 @@ public class Config {
                 return red_yellow;
             }
 
-            public String getMultiColour() {
-                return multiColour;
+            public String getMultiRent() {
+                return multiRent;
             }
         }
 
@@ -303,11 +303,159 @@ public class Config {
         private String history1;
         private String history2;
         private String history3;
+        private String save1;
+        private String save2;
+        private String save3;
+
         private String desktop;
-        private String actionCard;
-        private String moneyCard;
-        private String propertyCard;
+
+        private String birthday;
+        private String dealBreaker;
+        private String debtCollector;
+        private String doubleRent;
+        private String forceDeal;
+        private String hotel;
+        private String house;
+        private String justSayNo;
+        private String passGo;
+        private String slyDeal;
+
+        private String M1;
+        private String M2;
+        private String M3;
+        private String M4;
+        private String M5;
+        private String M10;
+
+        private String darkBlue_green;
+        private String utility_railRoad;
+        private String lightBlue_brown;
+        private String pink_orange;
+        private String red_yellow;
+        private String multiRent;
+
+        private String brown1;
+        private String brown_lightBlue;
+        private String darkBlue1;
+        private String green1;
+        private String green_darkBlue;
+        private String green_railRoad;
+        private String lightBlue1;
+        private String lightBlue_railRoad;
+        private String multiProperty;
+        private String orange1;
+        private String pink1;
+        private String orange_pink;
+        private String railRoad1;
+        private String railRoad_utility;
+        private String red1;
+        private String utility1;
+        private String yellow1;
+        private String yellow_red;
+
+        private String brownProperty;
+        private String darkBlueProperty;
+        private String greenProperty;
+        private String lightBlueProperty;
+        private String orangeProperty;
+        private String pinkProperty;
+        private String railRoadProperty;
+        private String redProperty;
+        private String utilityProperty;
+        private String yellowProperty;
+
         private String cardBack;
+        private String frame;
+
+        public String getBirthday() {
+            return birthday;
+        }
+
+        public String getDealBreaker() {
+            return dealBreaker;
+        }
+
+        public String getDebtCollector() {
+            return debtCollector;
+        }
+
+        public String getDoubleRent() {
+            return doubleRent;
+        }
+
+        public String getForceDeal() {
+            return forceDeal;
+        }
+
+        public String getHotel() {
+            return hotel;
+        }
+
+        public String getHouse() {
+            return house;
+        }
+
+        public String getJustSayNo() {
+            return justSayNo;
+        }
+
+        public String getPassGo() {
+            return passGo;
+        }
+
+        public String getSlyDeal() {
+            return slyDeal;
+        }
+
+        public String getM1() {
+            return M1;
+        }
+
+        public String getM2() {
+            return M2;
+        }
+
+        public String getM3() {
+            return M3;
+        }
+
+        public String getM4() {
+            return M4;
+        }
+
+        public String getM5() {
+            return M5;
+        }
+
+        public String getM10() {
+            return M10;
+        }
+
+        public String getDarkBlue_green() {
+            return darkBlue_green;
+        }
+
+        public String getUtility_railRoad() {
+            return utility_railRoad;
+        }
+
+        public String getLightBlue_brown() {
+            return lightBlue_brown;
+        }
+
+        public String getPink_orange() {
+            return pink_orange;
+        }
+
+        public String getRed_yellow() {
+            return red_yellow;
+        }
+
+        public String getMultiRent() {
+            return multiRent;
+        }
+
+
 
         public String getCancel1() {
             return cancel1;
@@ -349,24 +497,88 @@ public class Config {
             return cardBack;
         }
 
-        public String getMoneyCard() {
-            return moneyCard;
-        }
-
-        public String getPropertyCard() {
-            return propertyCard;
+        public String getFrame() {
+            return frame;
         }
 
         public String getDesktop() {
             return desktop;
         }
 
-        public String getActionCard() {
-            return actionCard;
-        }
-
         public String getBackground() {
             return background;
+        }
+
+        public String getBrown1() {
+            return brown1;
+        }
+
+        public String getBrown_lightBlue() {
+            return brown_lightBlue;
+        }
+
+        public String getDarkBlue1() {
+            return darkBlue1;
+        }
+
+        public String getGreen1() {
+            return green1;
+        }
+
+        public String getGreen_darkBlue() {
+            return green_darkBlue;
+        }
+
+        public String getGreen_railRoad() {
+            return green_railRoad;
+        }
+
+        public String getLightBlue1() {
+            return lightBlue1;
+        }
+
+        public String getLightBlue_railRoad() {
+            return lightBlue_railRoad;
+        }
+
+        public String getMultiProperty() {
+            return multiProperty;
+        }
+
+        public String getOrange1() {
+            return orange1;
+        }
+
+        public String getPink1() {
+            return pink1;
+        }
+
+        public String getOrange_pink() {
+            return orange_pink;
+        }
+
+        public String getRailRoad1() {
+            return railRoad1;
+        }
+
+        public String getRailRoad_utility() {
+            return railRoad_utility;
+        }
+
+        public String getRed1() {
+            return red1;
+        }
+
+        public String getUtility1() {
+            return utility1;
+        }
+
+        public String getYellow1() {
+            return yellow1;
+        }
+
+        public String getYellow_red() {
+            return yellow_red;
         }
 
         public String getHistory1() {
@@ -379,6 +591,18 @@ public class Config {
 
         public String getHistory3() {
             return history3;
+        }
+
+        public String getSave1() {
+            return save1;
+        }
+
+        public String getSave2() {
+            return save2;
+        }
+
+        public String getSave3() {
+            return save3;
         }
 
         public String getExit1() {
@@ -419,6 +643,46 @@ public class Config {
 
         public String getGameStart3() {
             return gameStart3;
+        }
+
+        public String getBrownProperty() {
+            return brownProperty;
+        }
+
+        public String getDarkBlueProperty() {
+            return darkBlueProperty;
+        }
+
+        public String getGreenProperty() {
+            return greenProperty;
+        }
+
+        public String getLightBlueProperty() {
+            return lightBlueProperty;
+        }
+
+        public String getOrangeProperty() {
+            return orangeProperty;
+        }
+
+        public String getPinkProperty() {
+            return pinkProperty;
+        }
+
+        public String getRailRoadProperty() {
+            return railRoadProperty;
+        }
+
+        public String getRedProperty() {
+            return redProperty;
+        }
+
+        public String getUtilityProperty() {
+            return utilityProperty;
+        }
+
+        public String getYellowProperty() {
+            return yellowProperty;
         }
     }
 }

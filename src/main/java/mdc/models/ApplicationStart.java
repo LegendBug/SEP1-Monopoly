@@ -87,8 +87,8 @@ public class ApplicationStart {
         });
         // 获取当前屏幕分辨率
         Insets insets = window.getInsets();
-        window.setSize(GameScreen.SCREEN_WIDTH + insets.left + insets.right,
-                GameScreen.SCREEN_HEIGHT + insets.top + insets.bottom);
+        window.setSize(GameScreen.screenWidth + insets.left + insets.right,
+                GameScreen.screenHeight + insets.top + insets.bottom);
         System.out.println(insets.left + insets.right + ":" + (insets.top + insets.bottom));
         window.setLocationRelativeTo(null);
         window.setResizable(false);
