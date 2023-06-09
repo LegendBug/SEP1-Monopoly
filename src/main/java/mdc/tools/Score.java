@@ -1,6 +1,5 @@
 package mdc.tools;
 
-
 public final class Score implements Comparable<Score> {
     private String name;
     private int value;

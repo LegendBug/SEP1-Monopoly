@@ -143,6 +143,11 @@ public class KeysListener implements KeysCommand, KeyListener {
         return false;
     }
 
+    public boolean[] getBos() {
+        return new boolean[]{hasPressedExit(), hasPressedEnter(), hasPressedUp(),
+                hasPressedDown(), hasPressedRight(), hasPressedLeft()};
+    }
+
     @Override
     public void resetKeyPresses() {
         ifExit = false;

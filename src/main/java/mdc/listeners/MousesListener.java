@@ -14,6 +14,7 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        ifClicked = true;
     }
 
     @Override
@@ -42,7 +43,11 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
 
     @Override
     public boolean hasClickedButton1() {
-        return ifClicked;
+        if (ifClicked) {
+            ifClicked = false;
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -53,7 +58,6 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
     @Override
     public boolean hasReleasedButton1() {
         if (ifReleased) {
-            System.out.println(1);
             ifReleased = false;
             return true;
         }
@@ -82,6 +86,10 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
         ifReleased = false;
         ifEntered = false;
         ifExit = false;
+    }
+
+    public boolean[] getBos() {
+        return new boolean[]{hasClickedButton1(), hasPressedButton1(), hasReleasedButton1()};
     }
 
     @Override
