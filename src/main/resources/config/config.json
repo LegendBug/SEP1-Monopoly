@@ -10,7 +10,7 @@
       "JustSayNo": "3 4",
       "SlyDeal": "3 3",
       "ForceDeal": "4 3",
-      "DebtCollector": "3 3",
+      "DebtCollector": "30 3",
       "Birthday": "3 2",
       "PassGo": "10 1",
       "House": "3 3",
@@ -36,14 +36,14 @@
       "pink": "3 2 1 2 4",
       "lightBlue": "3 1 1 2 3",
       "railRoad": "4 2 1 2 3 4",
-      "darkBlue_green": "1 4",
+      "green_darkBlue": "1 4",
       "green_railRoad": "1 4",
-      "utility_railRoad": "1 2",
+      "railRoad_utility": "1 2",
       "lightBlue_railRoad": "1 4",
-      "lightBlue_brown": "1 1",
-      "pink_orange": "2 2",
-      "red_yellow": "2 3",
-      "multiColour": 2
+      "brown_lightBlue": "1 1",
+      "orange_pink": "2 2",
+      "yellow_red": "2 3",
+      "multiProperty": 2
     },
     "rentCards": {
       "darkBlue_green": "2 1",
@@ -51,7 +51,7 @@
       "lightBlue_brown": "2 1",
       "pink_orange": "2 1",
       "red_yellow": "2 1",
-      "multiColour": "3 3"
+      "multiRent": "3 3"
     }
   },
   "rectangle": {
@@ -80,10 +80,68 @@
     "history1": "src/main/resources/picture/button/history1.png",
     "history2": "src/main/resources/picture/button/history2.png",
     "history3": "src/main/resources/picture/button/history3.png",
+    "save1": "src/main/resources/picture/button/save1.png",
+    "save2": "src/main/resources/picture/button/save2.png",
+    "save3": "src/main/resources/picture/button/save3.png",
+
     "desktop": "src/main/resources/picture/game/desktop.png",
-    "actionCard": "src/main/resources/picture/game/actionCard.png",
-    "moneyCard": "src/main/resources/picture/game/moneyCard.png",
-    "propertyCard": "src/main/resources/picture/game/propertyCard.png",
-    "cardBack": "src/main/resources/picture/game/cardBack.png"
+
+    "birthday": "src/main/resources/picture/game/actionCard/birthday.png",
+    "dealBreaker": "src/main/resources/picture/game/actionCard/dealBreaker.png",
+    "debtCollector": "src/main/resources/picture/game/actionCard/debtCollector.png",
+    "doubleRent": "src/main/resources/picture/game/actionCard/doubleRent.png",
+    "forceDeal": "src/main/resources/picture/game/actionCard/forCedDeal.png",
+    "hotel": "src/main/resources/picture/game/actionCard/hotel.png",
+    "house": "src/main/resources/picture/game/actionCard/house.png",
+    "justSayNo": "src/main/resources/picture/game/actionCard/justSayNo.png",
+    "passGo": "src/main/resources/picture/game/actionCard/passGo.png",
+    "slyDeal": "src/main/resources/picture/game/actionCard/slyDeal.png",
+
+    "M1": "src/main/resources/picture/game/moneyCard/M1.png",
+    "M2": "src/main/resources/picture/game/moneyCard/M2.png",
+    "M3": "src/main/resources/picture/game/moneyCard/M3.png",
+    "M4": "src/main/resources/picture/game/moneyCard/M4.png",
+    "M5": "src/main/resources/picture/game/moneyCard/M5.png",
+    "M10": "src/main/resources/picture/game/moneyCard/M10.png",
+
+    "darkBlue_green": "src/main/resources/picture/game/rentCard/darkBlue_green.png",
+    "utility_railRoad": "src/main/resources/picture/game/rentCard/utility_railRoad.png",
+    "lightBlue_brown": "src/main/resources/picture/game/rentCard/lightBlue_brown.png",
+    "pink_orange": "src/main/resources/picture/game/rentCard/pink_orange.png",
+    "red_yellow": "src/main/resources/picture/game/rentCard/red_yellow.png",
+    "multiRent": "src/main/resources/picture/game/rentCard/multiRent.png",
+
+    "brown1": "src/main/resources/picture/game/propertyCard/brown1.png",
+    "brown_lightBlue": "src/main/resources/picture/game/propertyCard/brown_lightBlue.png",
+    "darkBlue1": "src/main/resources/picture/game/propertyCard/darkBlue1.png",
+    "green1": "src/main/resources/picture/game/propertyCard/green1.png",
+    "green_darkBlue": "src/main/resources/picture/game/propertyCard/green_darkBlue.png",
+    "green_railRoad": "src/main/resources/picture/game/propertyCard/green_railRoad.png",
+    "lightBlue1": "src/main/resources/picture/game/propertyCard/lightBlue1.png",
+    "lightBlue_railRoad": "src/main/resources/picture/game/propertyCard/lightBlue_railRoad.png",
+    "multiProperty": "src/main/resources/picture/game/propertyCard/multiProperty.png",
+    "orange1": "src/main/resources/picture/game/propertyCard/orange1.png",
+    "pink1": "src/main/resources/picture/game/propertyCard/pink1.png",
+    "orange_pink": "src/main/resources/picture/game/propertyCard/orange_pink.png",
+    "railRoad1": "src/main/resources/picture/game/propertyCard/railRoad1.png",
+    "railRoad_utility": "src/main/resources/picture/game/propertyCard/railRoad_utility.png",
+    "red1": "src/main/resources/picture/game/propertyCard/red1.png",
+    "utility1": "src/main/resources/picture/game/propertyCard/utility1.png",
+    "yellow1": "src/main/resources/picture/game/propertyCard/yellow1.png",
+    "yellow_red": "src/main/resources/picture/game/propertyCard/yellow_red.png",
+
+    "brownProperty": "src/main/resources/picture/game/property/brownProperty.png",
+    "darkBlueProperty": "src/main/resources/picture/game/property/darkBlueProperty.png",
+    "greenProperty": "src/main/resources/picture/game/property/greenProperty.png",
+    "lightBlueProperty": "src/main/resources/picture/game/property/lightBlueProperty.png",
+    "orangeProperty": "src/main/resources/picture/game/property/orangeProperty.png",
+    "pinkProperty": "src/main/resources/picture/game/property/pinkProperty.png",
+    "railRoadProperty": "src/main/resources/picture/game/property/railRoadProperty.png",
+    "redProperty": "src/main/resources/picture/game/property/redProperty.png",
+    "utilityProperty": "src/main/resources/picture/game/property/utilityProperty.png",
+    "yellowProperty": "src/main/resources/picture/game/property/yellowProperty.png",
+
+    "cardBack": "src/main/resources/picture/game/cardBack.png",
+    "frame": "src/main/resources/picture/game/frame.png"
   }
 }
