@@ -1,9 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.ICard;
-import mdc.components.piles.actionpile.ActionPile;
-import mdc.components.piles.drawpile.DrawPile;
+import mdc.components.cards.CardPhase;
 import mdc.components.players.Player;
+import mdc.states.game.MDCGame;
 
 /**
  * 所有人给两块
@@ -15,49 +14,54 @@ import mdc.components.players.Player;
  */
 
 public class Birthday extends AbstractActionCard {
-    private int turnMoney;
-    private int takeMoney;
-    private boolean isActing;
+    protected int payValue;
+    protected int remainToPay;
+    protected boolean isOpponentTurn;
+    protected Player tempPlayer;
 
     public Birthday(int turnMoney) {
         this.turnMoney = turnMoney;
-        this.takeMoney = takeMoney;
-        isActing = true;
+        this.payValue = 2;
+        this.remainToPay = 2;
+        this.isOpponentTurn = false;
+        this.needChooseOpponent = false;
+        this.needOtherBank = true;
+        this.tempPlayer = null;
     }
 
-    public void play(ActionPile pile, Player player, Player[] players) {
-        if (isActing) {
-            for (Player p : players) {
-                if (p != player) {
-                    p.takeMoney(player, p, takeMoney);
+    @Override
+    public void play(MDCGame game) {
+        // ActionPile pile, Player player, Player[] players
+        if (!isPhaseOver) {
+            super.play(game);
+            if (phase == CardPhase.otherBankPhase) {
+                if (isOpponentTurn) {
+                    // 取钱
+//                    System.out.println("index" + game.getCurrOpponentIndex());
+                    if (game.getSelectButton().isIfActive()) {
+                        int cardIndex = game.getCurrBankCardIndex();
+                        remainToPay -= tempPlayer.getOwnBank().getCards().get(cardIndex).getTurnMoney();
+                        tempPlayer.getOwnBank().takeCard(cardIndex, game.getCurrPlayer().getOwnBank()); // 将选中的钱加入出牌玩家的牌堆中
+                        game.getSelectButton().resetButton();
+                    }
+                    if (remainToPay <= 0 || tempPlayer.getOwnBank().size() == 0) {
+                        remainToPay = payValue;
+                        isOpponentTurn = false;
+                    }
+                } else {
+                    // 没有剩余对手，出牌结束
+                    if (opponents.size() == 0) isPhaseOver = true;
+                        // 在队列中切换对手
+                    else {
+                        tempPlayer = opponents.removeFirst(); // 将队首的玩家移出
+                        game.setCurrOpponentIndex(game.getCurrOpponentIndex() + 1); // 当前对手index加一
+                        game.setCurrPlayerPile(tempPlayer.getOwnPlayerPile()); // 将展示牌堆换成对手，不直接访问当前出牌玩家
+                        game.setCurrBankPile(tempPlayer.getOwnBank());
+                        game.setCurrPropertyPile(tempPlayer.getOwnProperty());
+                        isOpponentTurn = true;
+                    }
                 }
             }
-            pile.addCards(this);
         }
-    }
-
-    @Override
-    public int getTurnMoney() {
-        return turnMoney;
-    }
-
-    @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing = act;
-    }
-
-    @Override
-    public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
-    }
-
-    @Override
-    public void deal(DrawPile pile) {
-        pile.addCard(this);
     }
 }

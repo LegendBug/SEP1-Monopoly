@@ -1,8 +1,7 @@
 
-package mdc.components.piles.actionpile;
+package mdc.components.piles;
 
 import mdc.components.cards.actioncards.AbstractActionCard;
-import mdc.components.piles.drawpile.DrawPile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +21,7 @@ public class ActionPile {
 
     public void DrawCards(DrawPile pile){
         for (AbstractActionCard card:cards){
-            card.setActing(true);
+//            card.setActing(true);
             card.discard(pile);
             cards.clear();
         }

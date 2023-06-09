@@ -1,9 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.ICard;
-import mdc.components.cards.properties.AbstractPropertyCard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -22,12 +21,12 @@ public class SlyDeal extends AbstractActionCard {
         isActing=true;
     }
 
-    public void play(ActionPile pile, Player player, Player payPlayer, AbstractPropertyCard property){
-        if (isActing){
-            player.getOwnProperty().addProperty(property);
-            payPlayer.getOwnProperty().takeProperty(property,false);
-            pile.addCards(this);
-        }
+    public void play(ActionPile pile, Player player, Player payPlayer, PropertyCard property){
+//        if (isActing){
+//            player.getOwnProperty().addProperty(property);
+//            payPlayer.getOwnProperty().takeProperty(property,false);
+//            pile.addCards(this);
+//        }
     }
 
     @Override
@@ -41,17 +40,7 @@ public class SlyDeal extends AbstractActionCard {
     }
 
     @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
-    }
-
-    @Override
     public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
+        pile.addCard(this);
     }
 }

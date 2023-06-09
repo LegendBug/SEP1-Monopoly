@@ -1,6 +1,8 @@
-package mdc.components.piles.drawpile;
+package mdc.components.piles;
 
+import mdc.components.cards.AbstractCard;
 import mdc.components.cards.ICard;
+import mdc.components.piles.AbstractPile;
 import mdc.components.players.Player;
 
 import java.util.ArrayList;
@@ -10,9 +12,7 @@ import java.util.List;
 /**
  * 弃牌堆，依托答辩
  */
-public class DrawPile {
-    private final List<ICard> cards;
-
+public class DrawPile extends AbstractPile {
     public DrawPile() {
         cards = new ArrayList<>();
     }
@@ -21,31 +21,24 @@ public class DrawPile {
         return cards.size();
     }
 
-    public void shuffle() {//洗牌
-        Collections.shuffle(cards);
-    }
-
     public void deal(Player player, int number) { //发指定数量
         player.getOwnPlayerPile().addCards(takeCards(number));
     }
 
-    private ICard takeCard() {
+    private AbstractCard takeCard() {
         return cards.remove(cards.size() - 1);
     }
 
-    public List<ICard> takeCards(int value) {
-        List<ICard> tempCards = new ArrayList<>();
+    public ArrayList<AbstractCard> takeCards(int value) {
+        ArrayList<AbstractCard> tempCards = new ArrayList<>();
         for (int k = 0; k < value; k++) {
             tempCards.add(takeCard());
         }
         return tempCards;
     }
 
-    public void clearAll() {
-        cards.clear();
-    }
-
+    @Override
     public void addCard(ICard card) {
-        cards.add(card);
+        cards.add((AbstractCard) card);
     }
 }

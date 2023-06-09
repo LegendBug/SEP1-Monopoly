@@ -1,17 +1,17 @@
 package mdc.states.game;
 
-import mdc.components.cards.Colors;
+import mdc.components.cards.CardColor;
 import mdc.components.cards.actioncards.AbstractActionCard;
 import mdc.components.cards.actioncards.RentCard;
 import mdc.components.cards.moneycards.MoneyCard;
 import mdc.components.cards.properties.AbstractPropertyCard;
-import mdc.components.cards.properties.Property;
-import mdc.components.cards.properties.PropertyWild;
-import mdc.components.piles.actionpile.ActionPile;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.ownbank.OwnBank;
-import mdc.components.piles.ownproperties.OwnProperty;
-import mdc.components.piles.playerpile.OwnPlayerPile;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.cards.properties.PropertyWildCard;
+import mdc.components.piles.ActionPile;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.OwnBank;
+import mdc.components.piles.OwnProperty;
+import mdc.components.piles.OwnPlayerPile;
 import mdc.components.players.Player;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
@@ -205,24 +205,24 @@ public class MDCGame implements State, Game {
     private void createProperties() {
         Config.GameInfo.Properties propertiesInfo = config.getGameInfo().getProperties();
         Field[] fields = Config.GameInfo.Properties.class.getDeclaredFields();
-        Map<Colors, String[]> colorInfo = new HashMap<>();
+        Map<CardColor, String[]> colorInfo = new HashMap<>();
         for (Field field : fields) {
             field.setAccessible(true);
             try {
                 String fieldName = field.getName();
                 if (fieldName.equals("multiColour")) { // 添加全色牌
                     int num = (int) field.get(propertiesInfo);
-                    for (int i = 0; i < num; i++) this.drawPile.addCard(new Property());
+                    for (int i = 0; i < num; i++) this.drawPile.addCard(new PropertyCard());
                 } else if (fieldName.split("_").length == 1) { // 添加单色牌
-                    Colors color = Colors.valueOf(fieldName);
+                    CardColor color = CardColor.valueOf(fieldName);
                     String[] info = field.get(propertiesInfo).toString().split(" ");
                     colorInfo.put(color, info);
                     createPropertyCards(color, info);
                 } else if (fieldName.split("_").length == 2) { // 添加双色牌
                     String[] colors = fieldName.split("_");
                     String[] info = field.get(propertiesInfo).toString().split(" ");
-                    Colors color1 = Colors.valueOf(colors[0]);
-                    Colors color2 = Colors.valueOf(colors[1]);
+                    CardColor color1 = CardColor.valueOf(colors[0]);
+                    CardColor color2 = CardColor.valueOf(colors[1]);
                     String[] info1 = colorInfo.get(color1);
                     String[] info2 = colorInfo.get(color2);
                     createPropertyWildCards(info, color1, color2, info1, info2);
@@ -233,24 +233,24 @@ public class MDCGame implements State, Game {
         }
     }
 
-    private Property createPropertyCard(Colors color, int[] values) {
+    private PropertyCard createPropertyCard(CardColor color, int[] values) {
         String className = "mdc.components.cards.properties.Property";
-        Property card;
+        PropertyCard card;
         try {
             Class<?> cardClass = Class.forName(className);
             Constructor<?> constructor;
             switch (values.length) {
                 case 3 -> {
-                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class);
-                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2]);
+                    constructor = cardClass.getConstructor(int.class, CardColor.class, int.class, int.class);
+                    card = (PropertyCard) constructor.newInstance(values[0], color, values[1], values[2]);
                 }
                 case 4 -> {
-                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class, int.class);
-                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2], values[3]);
+                    constructor = cardClass.getConstructor(int.class, CardColor.class, int.class, int.class, int.class);
+                    card = (PropertyCard) constructor.newInstance(values[0], color, values[1], values[2], values[3]);
                 }
                 case 5 -> {
-                    constructor = cardClass.getConstructor(int.class, Colors.class, int.class, int.class, int.class, int.class);
-                    card = (Property) constructor.newInstance(values[0], color, values[1], values[2], values[3], values[4]);
+                    constructor = cardClass.getConstructor(int.class, CardColor.class, int.class, int.class, int.class, int.class);
+                    card = (PropertyCard) constructor.newInstance(values[0], color, values[1], values[2], values[3], values[4]);
                 }
                 default -> throw new IllegalArgumentException("Invalid number of arguments for Property card");
             }
@@ -262,7 +262,7 @@ public class MDCGame implements State, Game {
         }
     }
 
-    private void createPropertyCards(Colors color, String[] info) {
+    private void createPropertyCards(CardColor color, String[] info) {
         int[] values = new int[info.length - 1];
         for (int i = 1; i < info.length; i++) values[i - 1] = Integer.parseInt(info[i]);
         for (int i = 0; i < Integer.parseInt(info[0]); i++) {
@@ -271,16 +271,16 @@ public class MDCGame implements State, Game {
         }
     }
 
-    private void createPropertyWildCards(String[] info, Colors color1, Colors color2, String[] info1, String[] info2) {
+    private void createPropertyWildCards(String[] info, CardColor color1, CardColor color2, String[] info1, String[] info2) {
         int[] values1 = new int[info1.length - 1];
         for (int i = 1; i < info1.length; i++) values1[i - 1] = Integer.parseInt(info1[i]);
         int[] values2 = new int[info2.length - 1];
         for (int i = 1; i < info2.length; i++) values2[i - 1] = Integer.parseInt(info2[i]);
 
         for (int i = 0; i < Integer.parseInt(info[0]); i++) {
-            Property card1 = createPropertyCard(color1, values1);
-            Property card2 = createPropertyCard(color2, values2);
-            PropertyWild card = new PropertyWild(Integer.parseInt(info[1]), card1, card2);
+            PropertyCard card1 = createPropertyCard(color1, values1);
+            PropertyCard card2 = createPropertyCard(color2, values2);
+            PropertyWildCard card = new PropertyWildCard(Integer.parseInt(info[1]), card1, card2);
             this.drawPile.addCard(card);
         }
     }
@@ -299,11 +299,11 @@ public class MDCGame implements State, Game {
                 } else {
                     String[] info = field.get(rentCardsInfo).toString().split(" ");
                     String[] colors = field.getName().split("_");
-                    Colors color1 = Colors.valueOf(colors[0]);
-                    Colors color2 = Colors.valueOf(colors[1]);
+                    CardColor color1 = CardColor.valueOf(colors[0]);
+                    CardColor color2 = CardColor.valueOf(colors[1]);
                     for (int i = 0; i < Integer.parseInt(info[0]); i++) {
                         Class<?> cardClass = Class.forName(className);
-                        Constructor<?> constructor = cardClass.getConstructor(int.class, Colors.class, Colors.class);
+                        Constructor<?> constructor = cardClass.getConstructor(int.class, CardColor.class, CardColor.class);
                         RentCard card = (RentCard) constructor.newInstance(Integer.parseInt(info[1]), color1, color2);
                         this.drawPile.addCard(card);
                     }

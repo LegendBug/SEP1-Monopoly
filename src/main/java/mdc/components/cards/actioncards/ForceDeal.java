@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
 import mdc.components.cards.ICard;
-import mdc.components.cards.properties.AbstractPropertyCard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -28,31 +28,21 @@ public class ForceDeal extends AbstractActionCard {
     }
 
     //应该在使用该方法之前用isFullSet判断是否是一整套
-    public void play(ActionPile pile, Player player, Player dealPlayer, AbstractPropertyCard card, AbstractPropertyCard dealCard){
-        if (isActing){
-            if (!dealPlayer.getOwnProperty().ifFullSet(dealCard)){
-                player.getOwnProperty().takeProperty(card,false);
-                player.getOwnProperty().addProperty(dealCard);
-                dealPlayer.getOwnProperty().takeProperty(dealCard,false);
-                dealPlayer.getOwnProperty().addProperty(card);
-                pile.addCards(this);
-            }
-        }
+    public void play(ActionPile pile, Player player, Player dealPlayer, PropertyCard card, PropertyCard dealCard){
+//        if (isActing){
+//            if (!dealPlayer.getOwnProperty().ifFullSet(dealCard)){
+//                player.getOwnProperty().takeProperty(card,false);
+//                player.getOwnProperty().addProperty(dealCard);
+//                dealPlayer.getOwnProperty().takeProperty(dealCard,false);
+//                dealPlayer.getOwnProperty().addProperty(card);
+//                pile.addCards(this);
+//            }
+//        }
     }
 
     @Override
     public int getTurnMoney() {
         return turnMoney;
-    }
-
-    @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
     }
 
     @Override

@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.Colors;
+import mdc.components.cards.CardColor;
 import mdc.components.cards.ICard;
-import mdc.components.piles.actionpile.ActionPile;
-import mdc.components.piles.drawpile.DrawPile;
+import mdc.components.piles.ActionPile;
+import mdc.components.piles.DrawPile;
 import mdc.components.players.Player;
 
 
@@ -19,10 +19,10 @@ import mdc.components.players.Player;
 public class RentCard extends AbstractActionCard {
     private int turnMoney;
     private boolean isActing;
-    private Colors color1, color2, finalColor;
+    private CardColor color1, color2, finalColor;
     private boolean isFullColor;
 
-    public RentCard(int turnMoney, Colors color1, Colors color2) {
+    public RentCard(int turnMoney, CardColor color1, CardColor color2) {
         this.turnMoney = turnMoney;
         this.color1 = color1;
         this.color2 = color2;
@@ -33,6 +33,8 @@ public class RentCard extends AbstractActionCard {
     //创建全色卡牌
     public RentCard(int turnMoney) {
         this.turnMoney = turnMoney;
+        this.color1 = null;
+        this.color2 = null;
         isActing = true;
         this.isFullColor = true;
     }
@@ -82,7 +84,7 @@ public class RentCard extends AbstractActionCard {
         }
     }
 
-    public void chooseColor(Colors c) {
+    public void chooseColor(CardColor c) {
         finalColor = c;
     }
 
@@ -91,26 +93,17 @@ public class RentCard extends AbstractActionCard {
     }
 
     @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing = act;
-    }
-
-    @Override
     public void discard(DrawPile pile) {
         pile.addCard((ICard) this);
     }
 
-    public Colors getFinalColor() {
+    public CardColor getFinalColor() {
         return finalColor;
     }
 
-    public String getColor() {
-        return color1 + " " + color2;
+    @Override
+    public String toString() {
+        return color1 + "_" + color2;
     }
 
     public boolean isFullColor() {

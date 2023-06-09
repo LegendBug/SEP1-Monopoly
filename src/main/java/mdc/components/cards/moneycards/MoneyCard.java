@@ -1,20 +1,22 @@
 package mdc.components.cards.moneycards;
 
-import mdc.components.cards.ICard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.ownbank.OwnBank;
-import mdc.components.players.Player;
+import mdc.components.cards.AbstractCard;
+import mdc.components.piles.DrawPile;
+import mdc.states.game.MDCGame;
 
-public class MoneyCard implements ICard {
-    private int turnMoney;
+public class MoneyCard extends AbstractCard {
 
-    public MoneyCard(int turnMoney){
+    public MoneyCard(int turnMoney) {
+        super();
+        this.isMoney = true;
         this.turnMoney = turnMoney;
     }
 
-    public void play(Player player, MoneyCard card){
-        OwnBank ownBank =player.getOwnBank();
-        ownBank.addCard(card);
+    @Override
+    public void play(MDCGame game) {
+        super.play(game);
+        game.getButtons().remove(game.getPlayButton());
+        game.getPlayButton().resetButton();
     }
 
     @Override

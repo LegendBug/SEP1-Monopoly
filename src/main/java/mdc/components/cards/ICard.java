@@ -1,9 +1,10 @@
 package mdc.components.cards;
 
-import mdc.components.piles.drawpile.DrawPile;
+import mdc.components.piles.DrawPile;
 
 public interface ICard {
-    public int getTurnMoney();
+
     public void discard(DrawPile pile);
+
     public void deal(DrawPile pile);
 }

@@ -1,8 +1,8 @@
 package mdc.components.cards.actioncards;
 
 import mdc.components.cards.ICard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 
 /**
  * 跟一个rent卡一起用，加倍
@@ -34,16 +34,6 @@ public class DoubleRent extends AbstractActionCard {
     @Override
     public int getTurnMoney() {
         return turnMoney;
-    }
-
-    @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
     }
 
     @Override

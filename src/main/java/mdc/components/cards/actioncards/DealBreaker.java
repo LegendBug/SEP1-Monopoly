@@ -1,9 +1,9 @@
 package mdc.components.cards.actioncards;
 
 import mdc.components.cards.ICard;
-import mdc.components.cards.properties.AbstractPropertyCard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -22,12 +22,11 @@ public class DealBreaker extends AbstractActionCard {
         isActing=true;
     }
 
-    public void play(ActionPile pile,Player payPlayer, AbstractPropertyCard card){
+    public void play(ActionPile pile,Player payPlayer, PropertyCard card){
         if (isActing){
             payPlayer.getOwnProperty().takeProperty(card,true);
             pile.addCards(this);
         }
-
     }
 
     @Override
@@ -38,16 +37,6 @@ public class DealBreaker extends AbstractActionCard {
     @Override
     public int getTurnMoney() {
         return turnMoney;
-    }
-
-    @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
     }
 
     @Override

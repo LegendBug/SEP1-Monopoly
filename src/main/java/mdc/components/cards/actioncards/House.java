@@ -1,9 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.ICard;
-import mdc.components.cards.properties.AbstractPropertyCard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 import mdc.components.players.Player;
 
 /**
@@ -14,14 +13,11 @@ import mdc.components.players.Player;
  * @para isActing:判断当前行动卡是否在生效
  */
 public class House extends AbstractActionCard {
-    private int turnMoney;
-    private int value;
     private boolean isActing;
 
 
     public House(int turnMoney){
         this.turnMoney=turnMoney;
-        this.value=value;
         isActing=true;
     }
 
@@ -30,7 +26,7 @@ public class House extends AbstractActionCard {
         pile.addCard(this);
     }
 
-    public void play(ActionPile pile, Player player, AbstractPropertyCard card, House house){
+    public void play(ActionPile pile, Player player, PropertyCard card, House house){
         if (isActing){
             if (player.getOwnProperty().ifFullSet(card)){
                 player.getOwnProperty().addHouse(house,card.getColor());
@@ -45,21 +41,7 @@ public class House extends AbstractActionCard {
     }
 
     @Override
-    public boolean isActing() {
-        return isActing;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
-    }
-
-    @Override
     public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
-    }
-
-    public int getValue() {
-        return value;
+        pile.addCard(this);
     }
 }

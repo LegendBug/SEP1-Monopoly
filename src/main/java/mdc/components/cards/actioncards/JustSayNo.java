@@ -1,8 +1,8 @@
 package mdc.components.cards.actioncards;
 
 import mdc.components.cards.ICard;
-import mdc.components.piles.drawpile.DrawPile;
-import mdc.components.piles.actionpile.ActionPile;
+import mdc.components.piles.DrawPile;
+import mdc.components.piles.ActionPile;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class JustSayNo extends AbstractActionCard {
                 card=pileCards.get(pileCards.size()-i);
                 i++;
             }
-            card.setActing(false);
+//            card.setActing(false);
             pile.addCards(this);
         }
     }
@@ -50,10 +50,5 @@ public class JustSayNo extends AbstractActionCard {
 
     public int getTurnMoney() {
         return turnMoney;
-    }
-
-    @Override
-    public void setActing(boolean act) {
-        isActing=act;
     }
 }
