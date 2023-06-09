@@ -1,5 +1,6 @@
-package mdc.screenpainters;
+package mdc.screens;
 
+import mdc.components.buttons.Button;
 import mdc.states.menu.MDCMenu;
 import mdc.tools.Config;
 import mdc.tools.GraphPainter;
@@ -77,11 +78,11 @@ public class MenuScreen extends JPanel {
         GraphPainter.drawString(g2d, "Cards", "Showcard Gothic", 1, screenHeight / 8, new Color(238, 238, 238), 2, mdcLogo6);
     }
 
-//    private void drawButton(Graphics2D g2d) throws IOException {
-//        for (Button button : menu.getButtonsCopy()) {
-//            GraphPainter.drawImage(g2d, button.getImage(), button.getRect(), false);
-//        }
-//    }
+    private void drawButton(Graphics2D g2d) throws IOException {
+        for (Button button : menu.getButtonsCopy()) {
+            GraphPainter.drawImage(g2d, button.getImage(), button.getRect(), false);
+        }
+    }
 
     private void drawBackground(Graphics2D g2d) throws IOException {
         GraphPainter.drawImage(g2d, background, backgroundRect, false);
@@ -91,7 +92,7 @@ public class MenuScreen extends JPanel {
         Graphics2D g2d = (Graphics2D) g.create();
         try {
             drawBackground(g2d);
-//            drawButton(g2d);
+            drawButton(g2d);
             drawString(g2d);
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -74,55 +74,66 @@ public class GameEngine {
         renderExecutor = Executors.newScheduledThreadPool(1);
 
         updateExecutor.scheduleAtFixedRate(() -> {
-            switch (this.screens) {
-                case HISTORY_SCREEN -> {
-                    if (this.history.isStateOver()) {
-                        this.history.moveToOtherStates();
-                        this.showMainMenuScreen();
+            try {
+                switch (this.screens) {
+                    case HISTORY_SCREEN -> {
+                        if (this.history.isStateOver()) {
+                            this.history.moveToOtherStates();
+                            this.showMainMenuScreen();
+                        }
                     }
-                }
-                case GAME_SCREEN -> {
-                    if (!this.game.isStateOver()) {
-                        this.game.updateState();
-                    } else {
-                        this.game.moveToOtherStates();
-                        this.showMainMenuScreen();
+                    case GAME_SCREEN -> {
+                        if (!this.game.isStateOver()) {
+                            this.game.updateState();
+                        } else {
+                            this.showMainMenuScreen();
+                            this.game.moveToOtherStates();
 //                        int scores = this.game.getPlayerScore();
 //                        if (scores > this.scoreKeeper.getLowestScore()) {
 //                            String name = JOptionPane.showInputDialog("New High Score, Please enter your name:");
 //                            this.scoreKeeper.addScore(name, scores);
 //                            this.showScoreScreen();
-                        // TODO 修复点击取消后的BUG
+                            // TODO 修复点击取消后的BUG
 
+                        }
                     }
-                }
-                case MENU_SCREEN -> {
-                    if (!this.menu.isStateOver()) {
-                        this.menu.updateState();
-                    } else {
-                        this.menu.moveToOtherStates();
-                        if (this.menu.isChosenGameSrc()) {
-                            this.showGameScreen();
-                        } else if (this.menu.isChosenHistorySrc()) {
-                            this.showScoreScreen();
-                        } else if (this.menu.isChosenExit()) {
-                            this.exitGame();
+                    case MENU_SCREEN -> {
+                        if (!this.menu.isStateOver()) {
+                            this.menu.updateState();
+                        } else {
+                            if (this.menu.isChosenGameSrc()) {
+                                this.showGameScreen();
+                            } else if (this.menu.isChosenHistorySrc()) {
+                                this.showScoreScreen();
+                            } else if (this.menu.isChosenExit()) {
+                                this.exitGame();
+                            }
+                            this.menu.moveToOtherStates();
                         }
                     }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
         }, 0, 17, TimeUnit.MILLISECONDS);
 
         renderExecutor.scheduleAtFixedRate(() -> {
-            switch (this.screens) {
-                case HISTORY_SCREEN ->
-                        this.historyScreen.paintImmediately(0, 0, this.history.getScreenWidth(), this.history.getScreenHeight());
-                case GAME_SCREEN ->
-                        this.gameScreen.paintImmediately(0, 0, this.game.getScreenWidth(), this.game.getScreenHeight());
-                case MENU_SCREEN ->
-                        this.menuScreen.paintImmediately(0, 0, this.menu.getScreenWidth(), this.menu.getScreenHeight());
+            try {
+                switch (this.screens) {
+                    case HISTORY_SCREEN ->
+                            this.historyScreen.paintImmediately(0, 0, this.history.getScreenWidth(), this.history.getScreenHeight());
+                    case GAME_SCREEN ->
+                            this.gameScreen.paintImmediately(0, 0, this.game.getScreenWidth(), this.game.getScreenHeight());
+                    case MENU_SCREEN ->
+                            this.menuScreen.paintImmediately(0, 0, this.menu.getScreenWidth(), this.menu.getScreenHeight());
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }, 0, 17, TimeUnit.MILLISECONDS);
+
+
     }
 
 

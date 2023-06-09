@@ -1,7 +1,15 @@
-package mdc.screenpainters;
+package mdc.screens;
 
-import mdc.states.ButtonStates;
-import mdc.states.game.GameButtons;
+import mdc.components.buttons.Button;
+import mdc.components.cards.AbstractCard;
+import mdc.components.cards.CardColor;
+import mdc.components.cards.ICard;
+import mdc.components.cards.actioncards.AbstractActionCard;
+import mdc.components.cards.actioncards.RentCard;
+import mdc.components.cards.moneycards.MoneyCard;
+import mdc.components.cards.properties.PropertyCard;
+import mdc.components.players.Player;
+import mdc.states.game.GamePhases;
 import mdc.states.game.MDCGame;
 import mdc.tools.Config;
 import mdc.tools.GraphPainter;
@@ -214,89 +222,182 @@ public class GameScreen extends JPanel {
 
     private void drawInfo(Graphics2D g2d) {
         GraphPainter.drawString(g2d, "player:" + game.getCurrPlayer(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 1 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "player:" + game.currPlayer, "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 2 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "phase:" + game.getCurrPhase(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 3 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "draw pile:" + game.getDrawPileNum(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 4 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "curr card:" + game.getCurrCard(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
                 new Rectangle(screenWidth * 20 / 48, screenHeight * 5 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "curr cards:" + game.getCurrPlayer().getOwnPlayerPile().size(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+        GraphPainter.drawString(g2d, "player:" + game.currPlayerIndex, "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
                 new Rectangle(screenWidth * 20 / 48, screenHeight * 6 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "phase:" + game.getCurrPhase(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                new Rectangle(screenWidth * 20 / 48, screenHeight * 7 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "draw pile:" + game.getDrawPileNum(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                new Rectangle(screenWidth * 20 / 48, screenHeight * 8 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "curr card:" + game.getCurrCard(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                new Rectangle(screenWidth * 20 / 48, screenHeight * 9 / 48, 200, 100));
+        GraphPainter.drawString(g2d, "curr cards:" + game.getCurrPlayer().getOwnPlayerPile().size(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                new Rectangle(screenWidth * 20 / 48, screenHeight * 10 / 48, 200, 100));
     }
-
 
     private void drawBackground(Graphics2D g2d) throws IOException {
         GraphPainter.drawImage(g2d, desktop, backgroundRect, false);
     }
 
-    private void drawButtonState(Graphics2D g2d, GameButtons button, Rectangle rect, Image image1, Image image2, ButtonStates state) throws IOException {
-        switch (state) {
-            case HOVER -> {
-                if (game.getGameButton() == button)
-                    GraphPainter.drawImage(g2d, image1, rect, false);
+    private void drawButton(Graphics2D g2d) throws IOException {
+        for (Button button : game.getButtonsCopy()) {
+            GraphPainter.drawImage(g2d, button.getImage(), button.getRect(), false);
+        }
+    }
+
+    private void drawDrawPile(Graphics2D g2d) throws IOException {
+        int num = Math.min(game.getDrawPileNum(), 10);
+        for (int i = 0; i < num; i++) {
+            Rectangle rect = new Rectangle(initialDrawPileX + 5 * i, initialDrawPileY, cardWidth, cardHeight);
+            GraphPainter.drawImage(g2d, cardBack, rect, false);
+        }
+    }
+
+    private void drawBankPile(Graphics2D g2d) throws IOException {
+        ArrayList<AbstractCard> cards = game.getCurrBankPile().getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            int addHeight = (i == game.getCurrBankCardIndex() && game.isSelected()) ? cardHeight / 2 : 0; // 当有卡牌被选择后，将牌举高高
+            boolean toBeSelected = (i == game.getCurrBankCardIndex() && addHeight == 0); // TODO 改变变暗时的判定
+            Rectangle rect = new Rectangle((cardWidth / 5) * i, screenHeight / 3 - addHeight, cardWidth * 3 / 4, cardHeight * 3 / 4);
+            ICard card = cards.get(i);
+            Image cardImage = null;
+            int money = ((AbstractCard) card).getTurnMoney();
+            cardImage = switch (money) {
+                case 1 -> M1;
+                case 2 -> M2;
+                case 3 -> M3;
+                case 4 -> M4;
+                case 5 -> M5;
+                case 10 -> M10;
+                default -> cardImage;
+            };
+            GraphPainter.drawImage(g2d, cardImage, rect, toBeSelected);
+        }
+    }
+
+    private void drawCurrentPlayerPile(Graphics2D g2d) throws IOException {
+        // TODO 非出牌玩家卡牌显示背面且不举高高
+        ArrayList<AbstractCard> cards = game.getCurrPlayerPile().getCards();
+        for (int i = 0; i < cards.size(); i++) {
+            int addHeight = (i == game.getCurrPlayerCardIndex() && game.isSelected()) ? cardHeight * 2 / 3 : 0; // 当有卡牌被选择后，将牌举高高
+            boolean toBeSelected = (i == game.getCurrPlayerCardIndex() && addHeight == 0);
+            Rectangle rect = new Rectangle((cardWidth / 3) * i, screenHeight - cardHeight - addHeight, cardWidth, cardHeight);
+            ICard card = cards.get(i);
+            Image cardImage = null;
+            if (card instanceof RentCard || card instanceof PropertyCard) {
+                String color = card.toString();
+                cardImage = switch (color) {
+                    case "darkBlue_green" -> darkBlue_green;
+                    case "utility_railRoad" -> utility_railRoad;
+                    case "lightBlue_brown" -> lightBlue_brown;
+                    case "pink_orange" -> pink_orange;
+                    case "red_yellow" -> red_yellow;
+                    case "null_null" -> multiRent;
+
+                    case "brown" -> brown1;
+                    case "darkBlue" -> darkBlue1;
+                    case "green" -> green1;
+                    case "lightBlue" -> lightBlue1;
+                    case "orange" -> orange1;
+                    case "pink" -> pink1;
+                    case "railRoad" -> railRoad1;
+                    case "red" -> red1;
+                    case "utility" -> utility1;
+                    case "yellow" -> yellow1;
+                    case "brown_lightBlue" -> brown_lightBlue;
+                    case "green_darkBlue" -> green_darkBlue;
+                    case "green_railRoad" -> green_railRoad;
+                    case "lightBlue_railRoad" -> lightBlue_railRoad;
+                    case "orange_pink" -> orange_pink;
+                    case "railRoad_utility" -> railRoad_utility;
+                    case "yellow_red" -> yellow_red;
+                    case "null" -> multiProperty;
+                    default -> cardImage;
+                };
+            } else if (card instanceof AbstractActionCard) {
+                String className = card.getClass().getSimpleName();
+                String cardName = className.substring(0, 1).toLowerCase() + className.substring(1);
+                cardImage = switch (cardName) {
+                    case "birthday" -> birthday;
+                    case "dealBreaker" -> dealBreaker;
+                    case "debtCollector" -> debtCollector;
+                    case "doubleRent" -> doubleRent;
+                    case "forceDeal" -> forceDeal;
+                    case "hotel" -> hotel;
+                    case "house" -> house;
+                    case "justSayNo" -> justSayNo;
+                    case "passGo" -> passGo;
+                    case "slyDeal" -> slyDeal;
+                    default -> cardImage;
+                };
+            } else if (card instanceof MoneyCard) {
+                int money = ((MoneyCard) card).getTurnMoney();
+                cardImage = switch (money) {
+                    case 1 -> M1;
+                    case 2 -> M2;
+                    case 3 -> M3;
+                    case 4 -> M4;
+                    case 5 -> M5;
+                    case 10 -> M10;
+                    default -> cardImage;
+                };
+            } else {
+                continue;
             }
-            case PRESSED -> {
-                if (game.getGameButton() == button)
-                    GraphPainter.drawImage(g2d, image2, rect, false);
+            GraphPainter.drawImage(g2d, cardImage, rect, toBeSelected);
+            if (toBeSelected) {
+                GraphPainter.drawString(g2d, "card:" + card, "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                        new Rectangle(screenWidth * 25 / 48, screenHeight * 11 / 48, 200, 100));
             }
         }
     }
 
-//    private void drawButton(Graphics2D g2d) throws  IOException {
-//        for (Button button : game.getButtonsCopy()) {
-//            GraphPainter.drawImage(g2d, button.getImage(), button.getRect(), false);
-//        }
-//    }
-
-
-//    private void drawDrawPile(Graphics2D g2d) throws IOException {
-//        int num = Math.min(game.getDrawPileNum(), 10);
-//        for (int i = 0; i < num; i++) {
-//            Rectangle rect = new Rectangle(INITIAL_DRAW_PILE_X + 5 * i, INITIAL_DRAW_PILE_Y, CARD_WIDTH, CARD_HEIGHT);
-//            GraphPainter.drawImage(g2d, cardBack, rect, false);
-//        }
-//    }
-
-    private void drawDiscardPile(Graphics2D g2d) throws IOException {
-        // TODO 画弃牌堆
+    private void drawCurrentPropertyPile(Graphics2D g2d) throws IOException {
+        for (int i = 0; i < 10; i++) {
+            boolean isSelected = (i == game.getCurrPropertyIndex());
+            CardColor color = game.getColors().get(i);
+            GraphPainter.drawImage(g2d, propertyImages.get(i), propertyRects.get(i), isSelected);
+            GraphPainter.drawString(g2d, String.valueOf(game.getCurrPropertyPile().getSize(color)), "Courier New",
+                    1, screenHeight / 32, Color.BLACK, 1, propertyRects.get(i));
+        }
     }
 
-//    private void drawCurrentPlayerPile(Graphics2D g2d) throws IOException {
-//        Player currPlayer = game.getCurrPlayer();
-//        List<ICard> cards = currPlayer.getOwnPlayerPile().getCards();
-//        for (int i = 0; i < cards.size(); i++) {
-//            int addHeight = (i == game.getCurrCard() && game.isSelected()) ? CARD_HEIGHT * 2 / 3 : 0;
-//            boolean toBeSelected = (i == game.getCurrCard() && addHeight == 0);
-//            Rectangle rect = new Rectangle((CARD_WIDTH / 3) * i, SCREEN_HEIGHT - CARD_HEIGHT - addHeight, CARD_WIDTH, CARD_HEIGHT);
-//            ICard card = cards.get(i);
-//            Image cardImage;
-//            if (card instanceof RentCard) {
-//                cardImage = actionCard;
-//            } else if (card instanceof AbstractActionCard) {
-//                cardImage = actionCard;
-//            } else if (card instanceof MoneyCard) {
-//                cardImage = moneyCard;
-//            } else if (card instanceof AbstractPropertyCard) {
-//                cardImage = propertyCard;
-//            } else {
-//                continue;
-//            }
-//            GraphPainter.drawImage(g2d, cardImage, rect, toBeSelected);
-//        }
-//    }
-
+    private void drawOpponentsInfo(Graphics2D g2d) throws IOException {
+        Player[] players = game.getPlayers();
+        int i = 0;
+        int j = 0;
+        while (i < game.getPlayerNum()) {
+            Player player = players[i];
+            if (player != game.getCurrPlayer()) {
+                // 打印不同状态的对象
+                Color color;
+                boolean toBeSelected = (j == game.getCurrOpponentIndex() && game.getCurrPhase() == GamePhases.playPhase);
+                if (toBeSelected) color = Color.RED;
+                else color = Color.WHITE;
+                int currOpponentID = (game.currPlayerIndex + j + 1) % game.getPlayerNum();
+                GraphPainter.drawString(g2d, currOpponentID + "  player pile: " + player.getOwnPlayerPile().size(),
+                        "Courier New", 1, screenHeight / 32, color, 0,
+                        new Rectangle(j * screenWidth / 4, 0, screenWidth / 4, screenHeight / 6));
+                GraphPainter.drawString(g2d, currOpponentID + "  bank pile: " + player.getOwnBank().getMoney(),
+                        "Courier New", 1, screenHeight / 32, color, 0,
+                        new Rectangle(j * screenWidth / 4, screenWidth / 48, screenWidth / 4, screenHeight / 6));
+                j++;
+            }
+            i++;
+        }
+    }
 
     protected void paintComponent(Graphics g) {
         Graphics2D g2d = (Graphics2D) g.create();
         try {
             drawBackground(g2d);
             drawInfo(g2d);
-//            drawButton(g2d);
-//            drawDrawPile(g2d);
-//            drawCurrentPlayerPile(g2d);
+            drawButton(g2d);
+            drawDrawPile(g2d);
+            drawBankPile(g2d);
+            drawCurrentPlayerPile(g2d);
+            drawCurrentPropertyPile(g2d);
+            drawOpponentsInfo(g2d);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

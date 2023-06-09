@@ -1,6 +1,7 @@
 package mdc.states.game;
 
-import mdc.components.cards.CardColor;
+import mdc.components.buttons.Button;
+import mdc.components.cards.*;
 import mdc.components.cards.actioncards.AbstractActionCard;
 import mdc.components.cards.actioncards.RentCard;
 import mdc.components.cards.moneycards.MoneyCard;
@@ -15,8 +16,7 @@ import mdc.components.piles.OwnPlayerPile;
 import mdc.components.players.Player;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
-import mdc.screenpainters.GameScreen;
-import mdc.states.ButtonStates;
+import mdc.screens.GameScreen;
 import mdc.states.State;
 import mdc.tools.Config;
 
@@ -24,24 +24,38 @@ import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class MDCGame implements State, Game {
-    private final KeysListener keysListener;
-    private final MousesListener mousesListener;
-    private final Config config;
     private int playerNum;
+    private int playCardNum;
     private int roundNum;
-    private Player[] players;
     private int currTime;
-    public int currPlayer;
-    private int currCard;
-    private ButtonStates buttonState;
-    private GameButtons gameButton;
+    private int currButton;
+    private int currPropertyIndex; // 相当于index
+    private int currBankCardIndex;
+    private int currPlayerCardIndex;
+    public int currPlayerIndex;
+    public int currOpponentIndex;
+    public int tempPlayer;
+
+    private AbstractCard currCard;
+    private Player currPlayer;
+    private Player[] players;
+
+    private Button playButton;
+    private Button saveButton;
+    private Button selectButton;
+    private Button cancelButton;
+    private Button discardButton;
+    private ArrayList<Button> buttons;
+
     private GamePhases lastPhase;
     private GamePhases currPhase;
+
     private OwnPlayerPile currPlayerPile;
     private OwnBank currBankPile;
     private OwnProperty currPropertyPile;
@@ -53,11 +67,27 @@ public class MDCGame implements State, Game {
     private boolean isSelected;
     private boolean isPhaseOver;
     private boolean isActionPhase;
-    private boolean isSelectCards;
+    private boolean isSelectPhase;
+    private boolean isStateOver;
+    boolean[] keysListenerBos;
+    boolean[] mouseListenerBos;
 
-    public boolean isSelected() {
-        return isSelected;
+    private final KeysListener keysListener;
+    private final MousesListener mousesListener;
+    private final ArrayList<CardColor> colors = new ArrayList<>();
+    {
+        colors.add(CardColor.brown);
+        colors.add(CardColor.darkBlue);
+        colors.add(CardColor.green);
+        colors.add(CardColor.lightBlue);
+        colors.add(CardColor.orange);
+        colors.add(CardColor.pink);
+        colors.add(CardColor.railRoad);
+        colors.add(CardColor.red);
+        colors.add(CardColor.utility);
+        colors.add(CardColor.yellow);
     }
+    private final Config config;
 
     public MDCGame(KeysListener keysListener, MousesListener mousesListener, Config config) {
         this.config = config;
@@ -68,19 +98,35 @@ public class MDCGame implements State, Game {
 
     @Override
     public void startState() {
-        this.isPause = true;
-        this.currTime = 0;
-        this.currPlayer = 0;
-        this.currCard = -1;
-        this.lastPhase = null;
-        this.buttonState = ButtonStates.NORMAL;
-        this.gameButton = GameButtons.NULL;
-        this.currPhase = GamePhases.drawCards;
-        this.playerNum = 5;
+        this.playerNum = 3; // TODO 改变游戏人数
+        this.playCardNum = 0;
         this.roundNum = 1;
+        this.currTime = 0;
+        this.currButton = -1;
+        this.currOpponentIndex = -1;
+        this.currBankCardIndex = -1;
+        this.currPlayerCardIndex = -1;
+        this.currPropertyIndex = -1;
+        this.currPlayerIndex = 0;
+
         this.players = new Player[playerNum];
+
+        this.playButton = new Button(GameScreen.playRect, GameScreen.play1, GameScreen.play2, GameScreen.play3);
+        this.saveButton = new Button(GameScreen.saveRect, GameScreen.save1, GameScreen.save2, GameScreen.save3);
+        this.selectButton = new Button(GameScreen.selectRect, GameScreen.select1, GameScreen.select2, GameScreen.select3);
+        this.cancelButton = new Button(GameScreen.cancelRect, GameScreen.cancel1, GameScreen.cancel2, GameScreen.cancel3);
+        this.discardButton = new Button(GameScreen.discardRect, GameScreen.discard1, GameScreen.discard2, GameScreen.discard3);
+        this.buttons = new ArrayList<>();
+        this.buttons.add(selectButton);
+
+        this.lastPhase = null;
+        this.currPhase = GamePhases.drawPhase;
+
+        this.isPause = true;
         this.isPhaseOver = false;
         this.isActionPhase = false;
+        this.isSelected = false;
+        this.isSelectPhase = false;
         createPlayers();
         createPiles();
     }
@@ -95,42 +141,130 @@ public class MDCGame implements State, Game {
         }
     }
 
+    public boolean isSelected() {
+        return isSelected;
+    }
+
     @Override
     public int getScreenWidth() {
-        return GameScreen.SCREEN_WIDTH;
+        return GameScreen.screenWidth;
     }
 
     @Override
     public int getScreenHeight() {
-        return GameScreen.SCREEN_HEIGHT;
+        return GameScreen.screenHeight;
     }
 
-    public int getCurrCard() {
+    public int getPlayerNum() {
+        return playerNum;
+    }
+
+    public int getCurrBankCardIndex() {
+        return currBankCardIndex;
+    }
+
+    public int getCurrPlayerCardIndex() {
+        return currPlayerCardIndex;
+    }
+
+    public AbstractCard getCurrCard() {
         return currCard;
     }
 
+    public OwnPlayerPile getCurrPlayerPile() {
+        return currPlayerPile;
+    }
+
+    public OwnBank getCurrBankPile() {
+        return currBankPile;
+    }
+
+    public OwnProperty getCurrPropertyPile() {
+        return currPropertyPile;
+    }
+
+    public int getCurrOpponentIndex() {
+        return currOpponentIndex;
+    }
+
+    public int getCurrPlayerIndex() {
+        return currPlayerIndex;
+    }
+
     public Player getCurrPlayer() {
-        return players[currPlayer];
+        return currPlayer;
     }
 
     public Player[] getPlayers() {
         return players;
     }
 
+    public Button getPlayButton() {
+        return playButton;
+    }
+
+    public Button getSaveButton() {
+        return saveButton;
+    }
+
+    public Button getSelectButton() {
+        return selectButton;
+    }
+
+    public Button getCancelButton() {
+        return cancelButton;
+    }
+
+    public Button getDiscardButton() {
+        return discardButton;
+    }
+
+    public ArrayList<Button> getButtons() {
+        return buttons;
+    }
+
+    public ArrayList<Button> getButtonsCopy() {
+        return new ArrayList<Button>(buttons);
+    }
+
+    public int getCurrPropertyIndex() {
+        return currPropertyIndex;
+    }
+
+    public void setCurrPropertyIndex(int index) {
+        currPropertyIndex = index;
+    }
+
+    public ArrayList<CardColor> getColors() {
+        return colors;
+    }
+
     public int getDrawPileNum() {
         return this.drawPile.size();
     }
 
-    public GameButtons getGameButton() {
-        return gameButton;
-    }
-
-    public ButtonStates getButtonState() {
-        return buttonState;
+    public int getBankPileNum() {
+        return this.currBankPile.size();
     }
 
     public GamePhases getCurrPhase() {
         return currPhase;
+    }
+
+    public void setCurrOpponentIndex(int index) {
+        currOpponentIndex = index;
+    }
+
+    public void setCurrPlayerPile(OwnPlayerPile currPlayerPile) {
+        this.currPlayerPile = currPlayerPile;
+    }
+
+    public void setCurrBankPile(OwnBank currBankPile) {
+        this.currBankPile = currBankPile;
+    }
+
+    public void setCurrPropertyPile(OwnProperty currPropertyPile) {
+        this.currPropertyPile = currPropertyPile;
     }
 
     private void createPlayers() {
@@ -141,6 +275,7 @@ public class MDCGame implements State, Game {
             OwnProperty propertyPile = new OwnProperty();
             players[i] = new Player(bankPile, propertyPile, playerPile);
         }
+        this.currPlayer = players[currPlayerIndex];
     }
 
     private void createPiles() {
@@ -155,9 +290,9 @@ public class MDCGame implements State, Game {
         // 加入弃牌堆
         this.discardPile = new DrawPile();
         // 设置当前玩家牌堆
-        this.currPlayerPile = players[currPlayer].getOwnPlayerPile();
-        this.currBankPile = players[currPlayer].getOwnBank();
-        this.currPropertyPile = players[currPlayer].getOwnProperty();
+        this.currPlayerPile = currPlayer.getOwnPlayerPile();
+        this.currBankPile = currPlayer.getOwnBank();
+        this.currPropertyPile = currPlayer.getOwnProperty();
     }
 
     private void createActionCards() {
@@ -182,7 +317,7 @@ public class MDCGame implements State, Game {
     }
 
     private void createMoneyCards() {
-        String packageName = "mdc.components.cards.moneycards.";
+        String className = "mdc.components.cards.moneycards.MoneyCard";
         Config.GameInfo.MoneyCards moneyCardsInfo = config.getGameInfo().getMoneyCards();
         Field[] fields = Config.GameInfo.MoneyCards.class.getDeclaredFields();
         for (Field field : fields) {
@@ -190,7 +325,6 @@ public class MDCGame implements State, Game {
             try {
                 int num = (int) field.get(moneyCardsInfo);
                 int moneyValue = Integer.parseInt(field.getName().substring(1, 2));
-                String className = packageName + "MoneyCard";
                 for (int i = 0; i < num; i++) {
                     MoneyCard card = (MoneyCard) Class.forName(className).getConstructor(int.class).newInstance(moneyValue);
                     this.drawPile.addCard(card);
@@ -210,9 +344,9 @@ public class MDCGame implements State, Game {
             field.setAccessible(true);
             try {
                 String fieldName = field.getName();
-                if (fieldName.equals("multiColour")) { // 添加全色牌
+                if (fieldName.equals("multiProperty")) { // 添加全色牌
                     int num = (int) field.get(propertiesInfo);
-                    for (int i = 0; i < num; i++) this.drawPile.addCard(new PropertyCard());
+                    for (int i = 0; i < num; i++) this.drawPile.addCard(new PropertyWildCard());
                 } else if (fieldName.split("_").length == 1) { // 添加单色牌
                     CardColor color = CardColor.valueOf(fieldName);
                     String[] info = field.get(propertiesInfo).toString().split(" ");
@@ -234,7 +368,7 @@ public class MDCGame implements State, Game {
     }
 
     private PropertyCard createPropertyCard(CardColor color, int[] values) {
-        String className = "mdc.components.cards.properties.Property";
+        String className = "mdc.components.cards.properties.PropertyCard";
         PropertyCard card;
         try {
             Class<?> cardClass = Class.forName(className);
@@ -293,11 +427,10 @@ public class MDCGame implements State, Game {
             field.setAccessible(true);
             try {
                 String fieldName = field.getName();
-                if (fieldName.equals("multiColour")) {
-                    String[] info = field.get(rentCardsInfo).toString().split(" ");
+                String[] info = field.get(rentCardsInfo).toString().split(" ");
+                if (fieldName.equals("multiRent")) {
                     for (int i = 0; i < Integer.parseInt(info[0]); i++) this.drawPile.addCard(new RentCard(Integer.parseInt(info[1])));
                 } else {
-                    String[] info = field.get(rentCardsInfo).toString().split(" ");
                     String[] colors = field.getName().split("_");
                     CardColor color1 = CardColor.valueOf(colors[0]);
                     CardColor color2 = CardColor.valueOf(colors[1]);
@@ -318,40 +451,104 @@ public class MDCGame implements State, Game {
 
     private void runDrawCardsPhase() {
         if (roundNum == 1) for (Player player : players) this.drawPile.deal(player, 5);
-        this.drawPile.deal(players[currPlayer], 2);
+        this.drawPile.deal(currPlayer, 2);
         isPhaseOver = true;
     }
 
     private void runPlayCardsPhase() {
-        isPhaseOver = true;
+        if (playCardNum < 3) {
+            if (!isSelected) isSelectPhase = true;
+            else  {
+                currCard = currPlayer.getOwnPlayerPile().getCards().get(currPlayerCardIndex);
+                // 监听事件
+                buttonController();
+                // 执行卡牌
+                currCard.play(this);
+                // 执行卡牌不同时期 运行后的行动
+                switch (currCard.getPhase()) {
+                    case waitingPhase -> {
+                        if (cancelButton.isIfActive()) {
+                            cancelButton.resetButton();
+                            isSelected = false;
+                        }
+                        // 判断出牌是否结束
+                        if (currCard.isPhaseOver()) {
+                            currCard.resetCard();
+                            currPlayerPile.takeCard(currPlayerCardIndex, currBankPile); // 移除卡牌
+                            currPlayerCardIndex = currPlayerPile.size() - 1;
+                            playCardNum++;
+                            isSelected = false;
+                        }
+                    }
+                    case chooseOpponentsPhase -> {
+                        // 选择敌方玩家
+                        int currOpponents = getPlayerNum() - 1;
+                        if (keysListenerBos[5])
+                            currOpponentIndex = (currOpponentIndex == -1 || currOpponentIndex == 0) ? currOpponents - 1 : currOpponentIndex - 1;
+                        else if (keysListenerBos[4])
+                            currOpponentIndex = (currOpponentIndex + 1) % currOpponents;
+                    }
+                    case ownPropertyPhase -> {
+                        // 选择property
+                        if (keysListenerBos[4])
+                            currPropertyIndex = (currPropertyIndex == -1 || currPropertyIndex == 0) ? 9 : currPropertyIndex - 1;
+                        else if (keysListenerBos[5])
+                            currPropertyIndex = (currPropertyIndex + 1) % 10;
+                        // 判断出牌是否结束
+                        if (currCard.isPhaseOver()) {
+                            currCard.resetCard();
+                            currPlayerPile.takeCard(currPlayerCardIndex, currPropertyPile); // 移除卡牌
+                            currPlayerCardIndex = currPlayerPile.size() - 1;
+                            currPropertyIndex = -1;
+                            playCardNum++;
+                            isSelected = false;
+                        }
+                    }
+                    case otherBankPhase -> {
+                        // 在敌方玩家银行中选择卡牌
+                        int currCards = currBankPile.size();
+                        if (keysListenerBos[5])
+                            currBankCardIndex = (currBankCardIndex == -1 || currBankCardIndex == 0) ? currCards - 1 : currBankCardIndex - 1;
+                        else if (keysListenerBos[4])
+                            currBankCardIndex = (currBankCardIndex + 1) % currCards;
+
+                        if (currCard.isPhaseOver()) {
+                            currCard.resetCard();
+
+                            currPlayerPile = currPlayer.getOwnPlayerPile();
+                            currBankPile = currPlayer.getOwnBank();
+                            currPropertyPile = currPlayer.getOwnProperty();
+
+                            currPlayerPile.removeCard(currPlayerCardIndex); // 移除该行动牌
+                            currPlayerCardIndex = currPlayerPile.size() - 1;
+                            currOpponentIndex = -1;
+                            currBankCardIndex = -1;
+                            playCardNum++;
+                            isSelected = false;
+                        }
+                    }
+                }
+            }
+
+        } else {
+            isPhaseOver = true;
+        }
     }
 
     private void runDiscardsPhase() {
         if (currPlayerPile.size() > 7) {
-            if (!isSelected) {
-                isSelectCards = true;
-            } else {
-                if (mousesListener.getMousePoint() != null) {
-                    if (GameScreen.DISCARD_RECT.contains(mousesListener.getMousePoint())) {
-                        gameButton = GameButtons.DISCARD;
-                        if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
-                        else if (mousesListener.hasReleasedButton1()) {
-                            currPlayerPile.getCards().remove(currCard);// 移除卡牌
-                            currCard = currPlayerPile.size() - 1;
-                            isSelected = false;
-                        } else buttonState = ButtonStates.HOVER;
-                    } else if (GameScreen.CANCEL_RECT.contains(mousesListener.getMousePoint())) {
-                        gameButton = GameButtons.CANCEL;
-                        if (mousesListener.hasPressedButton1()) {
-                            buttonState = ButtonStates.PRESSED;
-                        } else if (mousesListener.hasReleasedButton1()) {
-                            isSelected = false;
-                            buttonState = ButtonStates.HOVER;
-                        } else {
-                            buttonState = ButtonStates.HOVER;
-                        }
-                    }
-
+            if (!isSelected) isSelectPhase = true;
+            else {
+                buttonController();
+                if (cancelButton.isIfActive()) {
+                    cancelButton.setActive(false);
+                    isSelected = false;
+                }
+                else if (discardButton.isIfActive()) {
+                    currPlayerPile.removeCard(currPlayerCardIndex);// 移除卡牌
+                    currPlayerCardIndex = currPlayerPile.size() - 1;
+                    discardButton.setActive(false);
+                    isSelected = false;
                 }
             }
         } else {
@@ -360,20 +557,19 @@ public class MDCGame implements State, Game {
     }
 
     private void runSelectCards() {
-        int currCards = getCurrPlayer().getOwnPlayerPile().size();
-        if (keysListener.hasPressedLeft()) currCard = (currCard == -1 || currCard == 0) ? currCards - 1 : currCard - 1;
-        else if (keysListener.hasPressedRight()) currCard = (currCard + 1) % currCards;
+        int currCards = currPlayer.getOwnPlayerPile().size();
+        if (keysListenerBos[5])
+            currPlayerCardIndex = (currPlayerCardIndex == -1 || currPlayerCardIndex == 0) ? currCards - 1 : currPlayerCardIndex - 1;
+        else if (keysListenerBos[4])
+            currPlayerCardIndex = (currPlayerCardIndex + 1) % currCards;
 
-        if (mousesListener.getMousePoint() != null) {
-            if (GameScreen.SELECT_RECT.contains(mousesListener.getMousePoint())) {
-                gameButton = GameButtons.SELECT;
-                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
-                else if (mousesListener.hasReleasedButton1()) {
-                    isSelected = true;
-                    isPhaseOver = true;
-                } else buttonState = ButtonStates.HOVER;
-            }
+        buttonController();
+
+        if (currPlayerCardIndex != -1 && selectButton.isIfActive()) {
+            isSelected = true; // 卡牌选中
+            isPhaseOver = true;
         }
+        selectButton.setActive(false); // 防止不该选中的时候选中
     }
 
     private void runActionPhase() {
@@ -382,12 +578,30 @@ public class MDCGame implements State, Game {
 
     @Override
     public void listenerController() {
-        if (keysListener.hasPressedUp()) {
-            switch (currPhase) {
-                case playCards, discardCards, actionPhase -> isPhaseOver = true;
+        keysListenerBos = keysListener.getBos();
+        mouseListenerBos = mousesListener.getBos();
+    }
+
+    private void buttonController() {
+        if (keysListenerBos[2])
+            currButton = (currButton + 1) % buttons.size();
+        else if (keysListenerBos[3])
+            currButton = (currButton == -1 || currButton == 0) ? buttons.size() - 1 : currButton - 1;
+        if (mousesListener.getMousePoint() != null) {
+            // 方向键控制
+            for (int i = 0; i < buttons.size(); i++) {
+                Button button = buttons.get(i);
+                button.setSelected(i == currButton);
+                if (button.checkForState(mousesListener.getMousePoint(), mouseListenerBos[1],
+                        mouseListenerBos[2], keysListenerBos[1])) {
+                    currButton = i;
+                    button.setSelected(true); // 鼠标停留，选中
+                } else if (keysListenerBos[0] || mouseListenerBos[0]) {
+                    currButton = -1;
+                    button.setSelected(false);
+                }
+                if (i != currButton) buttons.get(i).setSelected(false); // 将其他卡牌设为为未选中
             }
-        } else if (currPhase == GamePhases.playCards && keysListener.hasPressedDown()) {
-            isActionPhase = true;
         }
     }
 
@@ -396,44 +610,58 @@ public class MDCGame implements State, Game {
             isActionPhase = false; // 防止重复设置phase
             this.lastPhase = GamePhases.valueOf(currPhase.toString());
             this.currPhase = GamePhases.actionPhase;
-        } else if (isSelectCards) {
-            isSelectCards = false;
+        } else if (isSelectPhase) {
+            isSelectPhase = false;
+            buttons.clear();
+            buttons.add(selectButton);
             this.lastPhase = GamePhases.valueOf(currPhase.toString());
-            this.currPhase = GamePhases.selectCards;
+            this.currPhase = GamePhases.selectPhase;
         } else {
             switch (currPhase) {
-                case drawCards -> {
+                case drawPhase -> {
                     if (isPhaseOver) {
-                        currCard = -1;
-                        currPhase = GamePhases.playCards;
+                        currButton = -1;
+                        currPhase = GamePhases.playPhase;
+                        buttons.clear();
+                        buttons.add(cancelButton);
+                        buttons.add(playButton);
                         isPhaseOver = false;
                     } else runDrawCardsPhase();
                 }
-                case playCards -> {
+                case playPhase -> {
                     if (isPhaseOver) {
-                        currCard = -1;
-                        currPhase = GamePhases.discardCards;
+                        currPlayerCardIndex = -1;
+                        playCardNum = 0;
+                        currButton = -1;
+                        currPhase = GamePhases.discardPhase;
                         isPhaseOver = false;
                     } else runPlayCardsPhase();
                 }
-                case discardCards -> {
-                    if (isPhaseOver) {
-                        moveToNextPlayer(); // 转移到下一玩家
-                        currPhase = GamePhases.drawCards;
-                        isPhaseOver = false;
-                    } else runDiscardsPhase();
-                }
-                case actionPhase -> {
+                case actionPhase -> { // TODO 特殊阶段
                     if (isPhaseOver) {
                         currPhase = GamePhases.valueOf(lastPhase.toString());
                         isPhaseOver = false;
                     } else runActionPhase();
                 }
-                case selectCards -> {
+                case selectPhase -> {
                     if (isPhaseOver) {
                         currPhase = GamePhases.valueOf(lastPhase.toString());
+                        currButton = -1;
+                        selectButton.resetButton();
+                        buttons.clear();
+                        buttons.add(cancelButton);
+                        if (currPhase == GamePhases.discardPhase) buttons.add(discardButton);
                         isPhaseOver = false;
                     } else runSelectCards();
+                }
+                case discardPhase -> {
+                    if (isPhaseOver) {
+                        currPlayerCardIndex = -1;
+                        currButton = -1;
+                        currPhase = GamePhases.drawPhase;
+                        isPhaseOver = false;
+                        moveToNextPlayer(); // 转移到下一玩家
+                    } else runDiscardsPhase();
                 }
             }
         }
@@ -472,15 +700,17 @@ public class MDCGame implements State, Game {
 
     public void moveToNextPlayer() {
         roundNum += 1;
-        currPlayer = (currPlayer + 1) % playerNum;
-        currPlayerPile = players[currPlayer].getOwnPlayerPile();
-        currBankPile = players[currPlayer].getOwnBank();
-        currPropertyPile = players[currPlayer].getOwnProperty();
+        currPlayerIndex = (currPlayerIndex + 1) % playerNum;
+        currPlayer = players[currPlayerIndex];
+        currPlayerPile = currPlayer.getOwnPlayerPile();
+        currBankPile = currPlayer.getOwnBank();
+        currPropertyPile = currPlayer.getOwnProperty();
     }
 
     @Override
     public void moveToOtherStates() {
         keysListener.resetKeyPresses();
         mousesListener.resetMousePressed();
+        buttons.clear();
     }
 }

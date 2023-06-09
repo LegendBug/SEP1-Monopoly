@@ -1,7 +1,7 @@
 package mdc.states.history;
 
 import mdc.listeners.KeysListener;
-import mdc.screenpainters.HistoryScreen;
+import mdc.screens.HistoryScreen;
 import mdc.states.State;
 import mdc.tools.Config;
 
