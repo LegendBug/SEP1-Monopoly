@@ -1,8 +1,10 @@
 package mdc.components.cards.actioncards;
 
+import mdc.components.cards.CardPhase;
 import mdc.components.cards.ICard;
 import mdc.components.piles.DrawPile;
 import mdc.components.players.Player;
+import mdc.states.game.MDCGame;
 
 /**
  * 摸两张
@@ -13,33 +15,26 @@ import mdc.components.players.Player;
  * @para isActing:判断当前行动卡是否在生效
  */
 public class PassGo extends AbstractActionCard {
-    private int turnMoney;
-    private int value;
-    private boolean isActing;
 
     public PassGo(int turnMoney) {
-        this.turnMoney = turnMoney;
-        this.value = value;
-        isActing = true;
-    }
-
-
-    public void play(Player player, DrawPile pile) {
-        pile.deal(player, value);
+        super(turnMoney);
+        this.needOwnPile = true;
     }
 
     @Override
-    public void deal(DrawPile pile) {
-        pile.addCard(this);
+    public void play(MDCGame game) {
+        if (!isPhaseOver) {
+            super.play(game);
+            if (phase == CardPhase.ownPilePhase) {
+                game.getDrawPile().deal(game.getCurrPlayer(), 2);
+                isPhaseOver = true;
+            }
+        }
     }
 
     @Override
-    public int getTurnMoney() {
-        return turnMoney;
-    }
-
-    @Override
-    public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
+    public void resetCard() {
+        super.resetCard();
+        this.needOwnPile = true;
     }
 }

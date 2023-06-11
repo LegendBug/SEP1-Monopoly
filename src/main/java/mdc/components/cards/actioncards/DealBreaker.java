@@ -1,10 +1,8 @@
 package mdc.components.cards.actioncards;
 
-import mdc.components.cards.ICard;
-import mdc.components.cards.properties.PropertyCard;
-import mdc.components.piles.DrawPile;
-import mdc.components.piles.ActionPile;
-import mdc.components.players.Player;
+import mdc.components.cards.CardColor;
+import mdc.components.cards.CardPhase;
+import mdc.states.game.MDCGame;
 
 /**
  * 偷一整套
@@ -13,34 +11,41 @@ import mdc.components.players.Player;
  * @para isActing:判断当前行动卡是否在生效
  */
 
-public class DealBreaker extends AbstractActionCard {
-    private final int turnMoney;
-    private boolean isActing;
+public class DealBreaker extends JustSayNo {
+    protected boolean needFullSet;
 
     public DealBreaker(int turnMoney){
-        this.turnMoney = turnMoney;
-        isActing=true;
+        super(turnMoney);
+        this.isPlayable = true;
+        this.needChooseOpponent = true;
+        this.needOtherProperty = true;
+        this.needFullSet = true;
     }
 
-    public void play(ActionPile pile,Player payPlayer, PropertyCard card){
-        if (isActing){
-            payPlayer.getOwnProperty().takeProperty(card,true);
-            pile.addCards(this);
+    @Override
+    public void play(MDCGame game){
+        if (!isPhaseOver) {
+            super.play(game);
+            if (!needOwnPropertyPile && phase == CardPhase.otherPropertyPhase) {
+                if (game.getSelectButton().isIfActive()) {
+                    // 取房产加入自己牌堆
+                    int cardIndex = game.getCurrPropertyIndex();
+                    CardColor color = game.getColors().get(cardIndex);
+                    game.getCurrPlayer().getOwnProperty().clear(color); // 清除当前牌堆
+                    tempOpponent.getOwnProperty().takeProperty(color, game.getCurrPlayer().getOwnProperty(), needFullSet);
+                    game.getSelectButton().resetButton();
+                    isPhaseOver = true;
+                }
+            }
         }
     }
 
     @Override
-    public void deal(DrawPile pile) {
-        pile.addCard(this);
-    }
-
-    @Override
-    public int getTurnMoney() {
-        return turnMoney;
-    }
-
-    @Override
-    public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
+    public void resetCard() {
+        super.resetCard();
+        this.isPlayable = true;
+        this.needChooseOpponent = true;
+        this.needOtherProperty = true;
+        this.needFullSet = true;
     }
 }

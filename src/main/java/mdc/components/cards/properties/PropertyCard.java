@@ -18,7 +18,6 @@ import java.util.ArrayList;
  * rent1-4：1-4张时分别能收多少租金
  */
 public class PropertyCard extends AbstractPropertyCard {
-    protected int value;
     protected ArrayList<Integer> rents = new ArrayList<>();
 
     public PropertyCard() {
@@ -30,7 +29,6 @@ public class PropertyCard extends AbstractPropertyCard {
     public PropertyCard(int turnMoney, CardColor color, int rent1, int rent2) {
         this();
         this.turnMoney = turnMoney;
-        this.value = 2;
         this.color = color;
         this.rents.add(rent1);
         this.rents.add(rent2);
@@ -40,7 +38,6 @@ public class PropertyCard extends AbstractPropertyCard {
     public PropertyCard(int turnMoney, CardColor color, int rent1, int rent2, int rent3) {
         this();
         this.turnMoney = turnMoney;
-        this.value = 3;
         this.color = color;
         this.rents.add(rent1);
         this.rents.add(rent2);
@@ -51,7 +48,6 @@ public class PropertyCard extends AbstractPropertyCard {
     public PropertyCard(int turnMoney, CardColor color, int rent1, int rent2, int rent3, int rent4) {
         this();
         this.turnMoney = turnMoney;
-        this.value = 4;
         this.color = color;
         this.rents.add(rent1);
         this.rents.add(rent2);
@@ -77,34 +73,35 @@ public class PropertyCard extends AbstractPropertyCard {
         }
     }
 
-    public void addHotel(Hotel hotel) {
-
-    }
-
-    public void addHouse(House house) {
-
-    }
-
-    public int getValue() {
-        return value;
+    public void addRent(int addRent) {
+        int maxRent = rents.get(rents.size() - 1) + addRent;
+        rents.set(rents.size() - 1, maxRent);
     }
 
     public CardColor getColor() {
         return color;
     }
 
-    public int getRent(int v) {
-//        switch ()
-//        if (v == 1) {
-//            return rent1;
-//        } else if (v == 2) {
-//            return rent2;
-//        } else if (v == 3) {
-//            return rent3;
-//        } else if (v == 4) {
-//            return fullSetRent;
-//        }
+    public int getRent(int size) {
+        switch (size) {
+            case 1 -> {
+                return rents.get(0);
+            }
+            case 2 -> {
+                return rents.get(1);
+            }
+            case 3 -> {
+                return rents.get(2);
+            }
+            case 4 -> {
+                return rents.get(3);
+            }
+        }
         return 0;
+    }
+
+    public ArrayList<Integer> getRents() {
+        return rents;
     }
 
     @Override
@@ -115,6 +112,7 @@ public class PropertyCard extends AbstractPropertyCard {
     @Override
     public void resetCard() {
         super.resetCard();
+        this.needOwnPropertyPile = true;
     }
 
     @Override

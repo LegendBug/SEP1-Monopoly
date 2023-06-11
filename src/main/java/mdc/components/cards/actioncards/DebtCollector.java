@@ -14,9 +14,8 @@ import mdc.states.game.MDCGame;
 public class DebtCollector extends Birthday {
     public DebtCollector(int turnMoney) {
         super(turnMoney);
-        this.turnMoney = turnMoney;
         this.needChooseOpponent = true;
-        this.payValue = 5;
+        this.expectToPay = 5;
         this.remainToPay = 5;
     }
 
@@ -25,5 +24,13 @@ public class DebtCollector extends Birthday {
         if (!isPhaseOver) {
             super.play(game);
         }
+    }
+
+    @Override
+    public void resetCard() {
+        super.resetCard();
+        this.needChooseOpponent = true;
+        this.expectToPay = 5;
+        this.remainToPay = 5;
     }
 }

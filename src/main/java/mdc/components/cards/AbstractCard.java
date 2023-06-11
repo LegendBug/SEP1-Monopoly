@@ -8,30 +8,16 @@ import java.util.ArrayList;
 
 public abstract class AbstractCard implements ICard {
     protected int turnMoney; // 面值
-
+    protected boolean isPhaseOver; // 卡牌行动是否结束
     protected boolean isPayable; // 是否可作为钱
     protected boolean isMoney; // 是否为钱
-    protected boolean isPhaseOver; // 卡牌行动是否结束
-    protected boolean needOwnPropertyPile;
-    protected boolean needChooseOpponent;
-    protected boolean needOtherPile;
-    protected boolean needOtherBank;
-    protected boolean needOtherProperty;
-    protected boolean needCardAttached; // 是否需要其他牌被选中
-    protected boolean canCardAttach; // 是否可附带打出别的牌
+
     protected CardPhase phase;
 
     public AbstractCard() {
         this.isPayable = true;
         this.isMoney = false;
         this.isPhaseOver = false;
-        this.needOwnPropertyPile = false;
-        this.needChooseOpponent = false;
-        this.needOtherPile = false;
-        this.needOtherBank = false;
-        this.needOtherProperty = false;
-        this.needCardAttached = false;
-        this.canCardAttach = false;
         this.phase = CardPhase.waitingPhase;
     }
 
@@ -79,13 +65,6 @@ public abstract class AbstractCard implements ICard {
         this.isPayable = true;
         this.isMoney = true;
         this.isPhaseOver = false;
-        this.needOwnPropertyPile = false;
-        this.needChooseOpponent = false;
-        this.needOtherPile = false;
-        this.needOtherBank = false;
-        this.needOtherProperty = false;
-        this.needCardAttached = false;
-        this.canCardAttach = false;
         this.phase = CardPhase.waitingPhase;
     }
 }

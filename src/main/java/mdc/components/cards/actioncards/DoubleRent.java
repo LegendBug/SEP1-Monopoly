@@ -3,6 +3,7 @@ package mdc.components.cards.actioncards;
 import mdc.components.cards.ICard;
 import mdc.components.piles.DrawPile;
 import mdc.components.piles.ActionPile;
+import mdc.states.game.MDCGame;
 
 /**
  * 跟一个rent卡一起用，加倍
@@ -12,32 +13,22 @@ import mdc.components.piles.ActionPile;
  */
 
 public class DoubleRent extends AbstractActionCard {
-    private int turnMoney;
-    private boolean isActing;
 
     public DoubleRent(int turnMoney){
-        this.turnMoney=turnMoney;
-        isActing=true;
+        super(turnMoney);
+        this.isPlayable = false;
     }
 
     @Override
-    public void deal(DrawPile pile) {
-        pile.addCard(this);
-    }
-
-    public void play(ActionPile pile, RentCard card){
-        if (isActing){
-            pile.addCards(this);
+    public void play(MDCGame game){
+        if (!isPhaseOver) {
+            super.play(game);
         }
     }
 
     @Override
-    public int getTurnMoney() {
-        return turnMoney;
-    }
-
-    @Override
-    public void discard(DrawPile pile) {
-        pile.addCard((ICard) this);
+    public void resetCard() {
+        super.resetCard();
+        this.isPlayable = false;
     }
 }
