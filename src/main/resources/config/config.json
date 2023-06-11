@@ -10,12 +10,12 @@
       "JustSayNo": "3 4",
       "SlyDeal": "3 3",
       "ForceDeal": "4 3",
-      "DebtCollector": "30 3",
-      "Birthday": "3 2",
+      "DebtCollector": "3 3",
+      "Birthday": "30 2",
       "PassGo": "10 1",
-      "House": "3 3",
+      "House": "3 2",
       "Hotel": "3 4",
-      "DoubleRent": "2 1"
+      "DoubleRent": "20 1"
     },
     "moneyCards": {
       "M1": 6,
@@ -26,9 +26,9 @@
       "M10": 1
     },
     "properties": {
-      "darkBlue": "2 4 3 8",
-      "brown": "2 1 1 2",
-      "utility": "2 2 1 2",
+      "darkBlue": "120 4 3 8",
+      "brown": "120 1 1 2",
+      "utility": "120 2 1 2",
       "green": "3 4 2 4 7",
       "yellow": "3 3 2 4 6",
       "red": "3 3 2 3 6",
@@ -43,15 +43,15 @@
       "brown_lightBlue": "1 1",
       "orange_pink": "2 2",
       "yellow_red": "2 3",
-      "multiProperty": 2
+      "multi_property": 2
     },
     "rentCards": {
       "darkBlue_green": "2 1",
       "utility_railRoad": "2 1",
       "lightBlue_brown": "2 1",
       "pink_orange": "2 1",
-      "red_yellow": "2 1",
-      "multiRent": "3 3"
+      "red_yellow": "20 1",
+      "multiRent": "30 3"
     }
   },
   "rectangle": {
@@ -140,8 +140,9 @@
     "redProperty": "src/main/resources/picture/game/property/redProperty.png",
     "utilityProperty": "src/main/resources/picture/game/property/utilityProperty.png",
     "yellowProperty": "src/main/resources/picture/game/property/yellowProperty.png",
+    "hotelProperty": "src/main/resources/picture/game/property/hotelProperty.png",
+    "houseProperty": "src/main/resources/picture/game/property/houseProperty.png",
 
     "cardBack": "src/main/resources/picture/game/cardBack.png",
-    "frame": "src/main/resources/picture/game/frame.png"
   }
 }
