@@ -166,7 +166,7 @@ public class Config {
             private String brown_lightBlue;
             private String orange_pink;
             private String yellow_red;
-            private int multiProperty;
+            private int multi_property;
 
             public String getDarkBlue() {
                 return darkBlue;
@@ -237,7 +237,7 @@ public class Config {
             }
 
             public int getMultiProperty() {
-                return multiProperty;
+                return multi_property;
             }
         }
 
@@ -363,6 +363,8 @@ public class Config {
         private String redProperty;
         private String utilityProperty;
         private String yellowProperty;
+        private String hotelProperty;
+        private String houseProperty;
 
         private String cardBack;
         private String frame;
@@ -454,7 +456,6 @@ public class Config {
         public String getMultiRent() {
             return multiRent;
         }
-
 
 
         public String getCancel1() {
@@ -683,6 +684,14 @@ public class Config {
 
         public String getYellowProperty() {
             return yellowProperty;
+        }
+
+        public String getHotelProperty() {
+            return hotelProperty;
+        }
+
+        public String getHouseProperty() {
+            return houseProperty;
         }
     }
 }
