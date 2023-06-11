@@ -1,4 +1,4 @@
-package mdc.screenpainters;
+package mdc.screens;
 
 
 import mdc.tools.GraphPainter;
@@ -9,8 +9,8 @@ import javax.swing.*;
 import java.awt.*;
 
 public class HistoryScreen extends JPanel {
-    public static final int SCREEN_WIDTH = MenuScreen.SCREEN_WIDTH;
-    public static final int SCREEN_HEIGHT = MenuScreen.SCREEN_HEIGHT;
+    public static final int SCREEN_WIDTH = MenuScreen.screenWidth;
+    public static final int SCREEN_HEIGHT = MenuScreen.screenHeight;
     private final ScoreKeeper scoreKeeper;
     private Score[] scores;
 

@@ -1,7 +1,7 @@
 package mdc.components.cards.properties;
 
-import mdc.components.cards.CardPhase;
 import mdc.components.cards.CardColor;
+import mdc.components.cards.CardPhase;
 import mdc.components.cards.actioncards.Hotel;
 import mdc.components.cards.actioncards.House;
 import mdc.components.piles.DrawPile;

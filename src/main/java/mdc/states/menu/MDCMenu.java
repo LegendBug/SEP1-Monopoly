@@ -1,114 +1,100 @@
 package mdc.states.menu;
 
+import mdc.components.buttons.Button;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
-import mdc.screenpainters.MenuScreen;
-import mdc.states.ButtonStates;
+import mdc.screens.MenuScreen;
 import mdc.states.State;
 import mdc.tools.Config;
 
+import java.util.ArrayList;
+
 public class MDCMenu implements State {
-    private MenuButtons menuButton;
-    private ButtonStates buttonState;
-    private final Config config;
-    private final KeysListener keysListener;
-    private final MousesListener mousesListener;
+    private int currButton;
+    private Button gameButton;
+    private Button historyButton;
+    private Button exitButton;
+    private ArrayList<Button> buttons = new ArrayList<>();
+
+
+    private KeysListener keysListener;
+    private MousesListener mousesListener;
+    private Config config;
+
+    private boolean isStateOver;
 
     public MDCMenu(KeysListener keysListener, MousesListener mousesListener, Config config) {
         this.config = config;
         this.keysListener = keysListener;
         this.mousesListener = mousesListener;
-        startState();
-    }
-
-    public MenuButtons getMenuButton() {
-        return menuButton;
-    }
-
-    public ButtonStates getButtonState() {
-        return buttonState;
     }
 
     @Override
     public int getScreenWidth() {
-        return MenuScreen.SCREEN_WIDTH;
+        return MenuScreen.screenWidth;
     }
 
     @Override
     public int getScreenHeight() {
-        return MenuScreen.SCREEN_HEIGHT;
+        return MenuScreen.screenHeight;
     }
 
-    private void nextButton() {
-        switch (menuButton) {
-            case GameScr -> menuButton = MenuButtons.HistoryScr;
-            case HistoryScr -> menuButton = MenuButtons.Exit;
-            case Null, Exit -> menuButton = MenuButtons.GameScr;
-        }
+    public int getCurrButton() {
+        return currButton;
     }
 
-    private void prevButton() {
-        switch (menuButton) {
-            case Null, GameScr -> menuButton = MenuButtons.Exit;
-            case HistoryScr -> menuButton = MenuButtons.GameScr;
-            case Exit -> menuButton = MenuButtons.HistoryScr;
-        }
+    public ArrayList<Button> getButtons() {
+        return buttons;
     }
 
-    public boolean isChosenHistorySrc() {
-        return menuButton == MenuButtons.HistoryScr;
+    public ArrayList<Button> getButtonsCopy() {
+        return new ArrayList<Button>(buttons);
     }
 
-    public boolean isChosenGameSrc() {
-        return menuButton == MenuButtons.GameScr;
-    }
-
-    public boolean isChosenExit() {
-        return menuButton == MenuButtons.Exit;
-    }
 
     @Override
     public boolean isStateOver() {
-        if (mousesListener.hasReleasedButton1()) {
-            return MenuScreen.GAME_RECT.contains(mousesListener.getMousePoint())
-                    || MenuScreen.HISTORY_RECT.contains(mousesListener.getMousePoint())
-                    || MenuScreen.EXIT_RECT.contains(mousesListener.getMousePoint());
+        for (Button button : buttons) {
+            if (button.isIfActive()) return true;
         }
-
-        return keysListener.hasPressedEnter();
+        return false;
     }
 
     @Override
     public void listenerController() {
-        if (keysListener.hasPressedUp()) {
-            prevButton();
-            buttonState = ButtonStates.HOVER;
-        } else if (keysListener.hasPressedDown()) {
-            nextButton();
-            buttonState = ButtonStates.HOVER;
-        }
-
-        if (mousesListener.getMousePoint() != null) {
-            if (MenuScreen.GAME_RECT.contains(mousesListener.getMousePoint())) {
-                menuButton = MenuButtons.GameScr;
-                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
-                else buttonState = ButtonStates.HOVER;
-            } else if (MenuScreen.HISTORY_RECT.contains(mousesListener.getMousePoint())) {
-                menuButton = MenuButtons.HistoryScr;
-                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
-                else buttonState = ButtonStates.HOVER;
-            } else if (MenuScreen.EXIT_RECT.contains(mousesListener.getMousePoint())) {
-                menuButton = MenuButtons.Exit;
-                if (mousesListener.hasPressedButton1()) buttonState = ButtonStates.PRESSED;
-                else buttonState = ButtonStates.HOVER;
+        boolean[] keysListenerBos = keysListener.getBos();
+        boolean[] mouseListenerBos = mousesListener.getBos();
+        // 方向键控制
+        if (keysListenerBos[4])
+            currButton = (currButton + 1) % buttons.size();
+        else if (keysListenerBos[5])
+            currButton = (currButton == -1 || currButton == 0) ? buttons.size() - 1 : currButton - 1;
+        // 鼠标控制 + 判断状态
+        // TODO 父类方法
+        for (int i = 0; i < buttons.size(); i++) {
+            Button button = buttons.get(i);
+            button.setSelected(i == currButton);
+            if (button.checkForState(mousesListener.getMousePoint(), mouseListenerBos[1],
+                    mouseListenerBos[2], keysListenerBos[1])) {
+                currButton = i;
+                button.setSelected(true); // 鼠标停留，选中
+            } else if (keysListenerBos[0] || mouseListenerBos[0]) {
+                currButton = -1;
+                button.setSelected(false);
             }
+            if (i != currButton) buttons.get(i).setSelected(false); // 将其他卡牌设为为未选中
         }
     }
 
     @Override
     public void startState() {
-        menuButton = MenuButtons.Null;
-        buttonState = ButtonStates.NORMAL;
+        this.currButton = -1;
+        this.gameButton = new Button(MenuScreen.gameRect, MenuScreen.gameStart1, MenuScreen.gameStart2, MenuScreen.gameStart3);
+        this.historyButton = new Button(MenuScreen.historyRect, MenuScreen.history1, MenuScreen.history2, MenuScreen.history3);
+        this.exitButton = new Button(MenuScreen.exitRect, MenuScreen.exit1, MenuScreen.exit2, MenuScreen.exit3);
+        this.buttons.add(gameButton);
+        this.buttons.add(historyButton);
+        this.buttons.add(exitButton);
     }
 
     @Override
@@ -122,4 +108,23 @@ public class MDCMenu implements State {
         mousesListener.resetMousePressed();
     }
 
+    public boolean isChosenGameSrc() {
+        if (gameButton.isIfSelected()) {
+            buttons.clear();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isChosenHistorySrc() {
+        if (historyButton.isIfSelected()) {
+            buttons.clear();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isChosenExit() {
+        return exitButton.isIfSelected();
+    }
 }
