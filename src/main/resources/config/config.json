@@ -143,6 +143,6 @@
     "hotelProperty": "src/main/resources/picture/game/property/hotelProperty.png",
     "houseProperty": "src/main/resources/picture/game/property/houseProperty.png",
 
-    "cardBack": "src/main/resources/picture/game/cardBack.png",
+    "cardBack": "src/main/resources/picture/game/cardBack.png"
   }
 }

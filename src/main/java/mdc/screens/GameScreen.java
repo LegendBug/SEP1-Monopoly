@@ -109,6 +109,8 @@ public class GameScreen extends JPanel {
     private static Image redProperty;
     private static Image utilityProperty;
     private static Image yellowProperty;
+    private static Image hotelProperty;
+    private static Image houseProperty;
     private static ArrayList<Image> propertyImages = new ArrayList<>();
     private final MDCGame game;
     private Color color;
@@ -218,6 +220,8 @@ public class GameScreen extends JPanel {
         propertyImages.add(redProperty);
         propertyImages.add(utilityProperty);
         propertyImages.add(yellowProperty);
+        hotelProperty = GraphPainter.getImage(config.getImagePath().getHotelProperty());
+        houseProperty = GraphPainter.getImage(config.getImagePath().getHouseProperty());
     }
 
     private void drawInfo(Graphics2D g2d) {
@@ -259,9 +263,9 @@ public class GameScreen extends JPanel {
             int addHeight = (i == game.getCurrBankCardIndex() && game.isSelected()) ? cardHeight / 2 : 0; // 当有卡牌被选择后，将牌举高高
             boolean toBeSelected = (i == game.getCurrBankCardIndex() && addHeight == 0); // TODO 改变变暗时的判定
             Rectangle rect = new Rectangle((cardWidth / 5) * i, screenHeight / 3 - addHeight, cardWidth * 3 / 4, cardHeight * 3 / 4);
-            ICard card = cards.get(i);
+            AbstractCard card = cards.get(i);
             Image cardImage = null;
-            int money = ((AbstractCard) card).getTurnMoney();
+            int money = card.getTurnMoney();
             cardImage = switch (money) {
                 case 1 -> M1;
                 case 2 -> M2;
@@ -279,8 +283,8 @@ public class GameScreen extends JPanel {
         // TODO 非出牌玩家卡牌显示背面且不举高高
         ArrayList<AbstractCard> cards = game.getCurrPlayerPile().getCards();
         for (int i = 0; i < cards.size(); i++) {
-            int addHeight = (i == game.getCurrPlayerCardIndex() && game.isSelected()) ? cardHeight * 2 / 3 : 0; // 当有卡牌被选择后，将牌举高高
-            boolean toBeSelected = (i == game.getCurrPlayerCardIndex() && addHeight == 0);
+            int addHeight = (i == game.getCurrPlayerCardIndex() && game.isSelected() && game.getCurrPlayerPile() == game.getCurrPlayer().getOwnPlayerPile()) ? cardHeight * 2 / 3 : 0; // 当有卡牌被选择后，将牌举高高
+            boolean toBeSelected = (i == game.getCurrPlayerCardIndex() && addHeight == 0 && game.getCurrPlayerPile() == game.getCurrPlayer().getOwnPlayerPile());
             Rectangle rect = new Rectangle((cardWidth / 3) * i, screenHeight - cardHeight - addHeight, cardWidth, cardHeight);
             ICard card = cards.get(i);
             Image cardImage = null;
@@ -357,6 +361,10 @@ public class GameScreen extends JPanel {
             boolean isSelected = (i == game.getCurrPropertyIndex());
             CardColor color = game.getColors().get(i);
             GraphPainter.drawImage(g2d, propertyImages.get(i), propertyRects.get(i), isSelected);
+            if (color == game.getCurrPropertyPile().getHotelColor())
+                GraphPainter.drawImage(g2d, hotelProperty, propertyRects.get(i), isSelected);
+            else if (color == game.getCurrPropertyPile().getHouseColor())
+                GraphPainter.drawImage(g2d, houseProperty, propertyRects.get(i), isSelected);
             GraphPainter.drawString(g2d, String.valueOf(game.getCurrPropertyPile().getSize(color)), "Courier New",
                     1, screenHeight / 32, Color.BLACK, 1, propertyRects.get(i));
         }
@@ -365,25 +373,22 @@ public class GameScreen extends JPanel {
     private void drawOpponentsInfo(Graphics2D g2d) throws IOException {
         Player[] players = game.getPlayers();
         int i = 0;
-        int j = 0;
-        while (i < game.getPlayerNum()) {
-            Player player = players[i];
+        for (Player player : players) {
             if (player != game.getCurrPlayer()) {
                 // 打印不同状态的对象
                 Color color;
-                boolean toBeSelected = (j == game.getCurrOpponentIndex() && game.getCurrPhase() == GamePhases.playPhase);
+                boolean toBeSelected = (i == game.getCurrOpponentIndex() && game.getCurrPhase() == GamePhases.playPhase);
                 if (toBeSelected) color = Color.RED;
                 else color = Color.WHITE;
-                int currOpponentID = (game.currPlayerIndex + j + 1) % game.getPlayerNum();
+                int currOpponentID = (game.currPlayerIndex + i + 1) % game.getPlayerNum();
                 GraphPainter.drawString(g2d, currOpponentID + "  player pile: " + player.getOwnPlayerPile().size(),
                         "Courier New", 1, screenHeight / 32, color, 0,
-                        new Rectangle(j * screenWidth / 4, 0, screenWidth / 4, screenHeight / 6));
-                GraphPainter.drawString(g2d, currOpponentID + "  bank pile: " + player.getOwnBank().getMoney(),
+                        new Rectangle(i * screenWidth / 4, 0, screenWidth / 4, screenHeight / 6));
+                GraphPainter.drawString(g2d, currOpponentID + "  bank pile: " + player.getOwnBank().getMoney() + " " + player.getOwnBank().size(),
                         "Courier New", 1, screenHeight / 32, color, 0,
-                        new Rectangle(j * screenWidth / 4, screenWidth / 48, screenWidth / 4, screenHeight / 6));
-                j++;
+                        new Rectangle(i * screenWidth / 4, screenWidth / 48, screenWidth / 4, screenHeight / 6));
+                i++;
             }
-            i++;
         }
     }
 

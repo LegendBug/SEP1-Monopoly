@@ -1,4 +1,4 @@
-package mdc.models;
+package mdc;
 
 import mdc.engine.GameEngine;
 import mdc.listeners.KeysListener;
