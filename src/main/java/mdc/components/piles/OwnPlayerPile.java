@@ -3,6 +3,9 @@ package mdc.components.piles;
 import mdc.components.cards.AbstractCard;
 import mdc.components.cards.ICard;
 
+import mdc.components.piles.AbstractPile;
+
+
 import java.util.ArrayList;
 
 /**
@@ -27,7 +30,6 @@ public class OwnPlayerPile extends AbstractPile {
         cards.add((AbstractCard) card);
     }
 
-    @Override
     public void takeCard(int currCardIndex, AbstractPile targetPile){
         ICard takenCard = removeCard(currCardIndex);
         targetPile.addCard(takenCard);

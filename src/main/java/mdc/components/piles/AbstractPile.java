@@ -13,16 +13,12 @@ public class AbstractPile {
     public void addCard(ICard card){
     }
 
-    public void takeCard(int currCardIndex, AbstractPile targetPile) {
-
-    }
-
     public void shuffle() {//洗牌
         Collections.shuffle(cards);
     }
 
     public void sort() {
-        Collections.sort(cards, Comparator.comparingInt(AbstractCard::getTurnMoney));
+        cards.sort(Comparator.comparingInt(AbstractCard::getTurnMoney));
     }
 
     public void clear() {

@@ -25,11 +25,6 @@ public class OwnBank extends OwnPlayerPile {
         money = 0;
     }
 
-    //临时方法，让用户选择赔钱的卡，涉及到listener到时候再改，卡的数值总合大于等于value，删除选择的卡,返回总合的值
-    public int choosePayCard(int value) {
-        return 0;
-    }
-
     @Override
     public void addCard(ICard card) {
         super.addCard(card);
