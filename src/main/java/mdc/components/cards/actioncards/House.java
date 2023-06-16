@@ -5,12 +5,7 @@ import mdc.components.cards.CardPhase;
 import mdc.states.game.MDCGame;
 
 /**
- * 放在成套的土地上收租加租金
- *
- * @para name:名字
- * @para turnMoney:放入银行多少钱
- * @para value:加多少钱
- * @para isActing:判断当前行动卡是否在生效
+ * On a set of land for rent and rent
  */
 public class House extends AbstractActionCard {
 
@@ -26,7 +21,7 @@ public class House extends AbstractActionCard {
             if (phase == CardPhase.ownPropertyPhase && game.getSelectButton().isIfActive()) {
                 CardColor color = game.getColors().get(game.getCurrPropertyIndex());
                 if (color != CardColor.railRoad && color != CardColor.utility) {
-                    game.getCurrPropertyPile().addRent(turnMoney, color);
+                    game.getGameInfoBar().add(game.getCurrPropertyPile().addRent(turnMoney, color));
                     isPhaseOver = true;
                 }
                 game.getSelectButton().resetButton();

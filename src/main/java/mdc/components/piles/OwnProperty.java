@@ -1,19 +1,16 @@
 package mdc.components.piles;
 
 import mdc.components.cards.CardColor;
-import mdc.components.cards.CardPhase;
 import mdc.components.cards.ICard;
 import mdc.components.cards.properties.PropertyCard;
 
-import java.awt.*;
 import java.util.*;
 import java.util.List;
 
 /**
- * 个人土地
+ * Player property card pile
  */
 public class OwnProperty extends AbstractPile {
-    private int asMoney;
     private Stack<PropertyCard> brownProperty = new Stack<>();
     private Stack<PropertyCard> darkBlueProperty = new Stack<>();
     private Stack<PropertyCard> greenProperty = new Stack<>();
@@ -61,8 +58,6 @@ public class OwnProperty extends AbstractPile {
 
         hasHouse = false;
         hasHotel = false;
-
-        asMoney = 0;
     }
 
     public Map<CardColor, Stack<PropertyCard>> getProperties() {
@@ -74,7 +69,7 @@ public class OwnProperty extends AbstractPile {
     }
 
     /**
-     * 向牌堆添加一张牌
+     * Add a card to the deck
      * @param newCard
      */
     @Override
@@ -95,25 +90,23 @@ public class OwnProperty extends AbstractPile {
     }
 
     /**
-     * 从牌堆顶取走一张牌
+     * Remove a card from the top of the deck
      *
      * @param color
      */
     public void takeCard(CardColor color, AbstractPile targetPile) {
         Stack<PropertyCard> property = properties.get(color);
-        if (property.size() > 0) targetPile.addCard(property.pop()); //移出卡牌的同时加入牌堆
-        else System.out.println("没房子！");
+        if (property.size() > 0) targetPile.addCard(property.pop()); //Add to the deck as you remove cards
     }
 
-    public void takeProperty(CardColor color, AbstractPile targetPile, boolean needFullSet) {
+    public boolean takeProperty(CardColor color, AbstractPile targetPile, boolean needFullSet) {
         Stack<PropertyCard> property = properties.get(color);
         if ((!needFullSet && property.size() < maxStackSizes.get(color)) || (needFullSet && property.size() == maxStackSizes.get(color))) {
             while (!property.isEmpty()) {
                 targetPile.addCard(property.pop());
             }
-        } else {
-            System.out.println("没满呢");
-        }
+            return true;
+        } return false;
     }
 
     public void clear(CardColor color) {
@@ -121,7 +114,6 @@ public class OwnProperty extends AbstractPile {
         property.clear();
     }
 
-    //临时方法，让用户用土地陪，涉及到listener到时候再改，卡的数值总合大于等于value，删除选择的卡,返回陪卡的列表
     public List<PropertyCard> choosePayCard(int value) {
         List<PropertyCard> cards = new ArrayList<>();
         return cards;
@@ -135,19 +127,10 @@ public class OwnProperty extends AbstractPile {
         Stack<PropertyCard> property = properties.get(color);
         int size = property.size();
         if (size == 0) {
-            System.out.println("空房子收不了租");
             return 0;
         } else {
             return property.peek().getRent(size);
         }
-    }
-
-    public boolean isHasHouse() {
-        return hasHouse;
-    }
-
-    public boolean isHasHotel() {
-        return hasHotel;
     }
 
     public CardColor getHouseColor() {
@@ -158,38 +141,40 @@ public class OwnProperty extends AbstractPile {
         return hotelColor;
     }
 
+    public Map<CardColor, Integer> getPropertySizes() {
+        Map<CardColor, Integer> propertySizes = new HashMap<>();
+        for (Map.Entry<CardColor, Stack<PropertyCard>> entry : properties.entrySet()) {
+            CardColor color = entry.getKey();
+            Stack<PropertyCard> stack = entry.getValue();
+            propertySizes.put(color, stack.size());
+        }
+        return propertySizes;
+    }
+
     /**
-     * 加收租金
+     * Additional rent
      * @param addValue
      * @param color
      */
-    public void addRent(int addValue, CardColor color) {
-        if (hasHouse && !hasHotel) {
-            if (addValue == 2) System.out.println("已经有房子了别加了");
-            else {
-                Stack<PropertyCard> property = properties.get(color);
-                if (property.size() == maxStackSizes.get(color) && color != houseColor) {
-                    PropertyCard topCard = property.peek();
-                    topCard.addRent(addValue);
-                    hasHotel = true;
-                    hotelColor = color;
-                } else System.out.println("还没满呢，或者这已经是house了");
-            }
-        } else if (hasHotel){
-            System.out.println("啥都有了别加了");
+    public String addRent(int addValue, CardColor color) {
+        if (hasHotel) return "You already own the house and the hotel!";
+        if (hasHouse && addValue == 2) return "You already own the house!";
+        if (!hasHouse && addValue == 4) return "You don't own a house yet!";
+        if (hasHouse && color == houseColor) return "You've made this your house!";
+        Stack<PropertyCard> property = properties.get(color);
+        if (property.size() != maxStackSizes.get(color)) return "The current property is not full!";
+        PropertyCard topCard = property.peek();
+        topCard.addRent(addValue);
+        if (hasHouse) {
+            hasHotel = true;
+            hotelColor = color;
         } else {
-            if (addValue == 4) System.out.println("还没有有房子不能加");
-            else {
-                Stack<PropertyCard> property = properties.get(color);
-                if (property.size() == maxStackSizes.get(color)) {
-                    PropertyCard topCard = property.peek();
-                    topCard.addRent(addValue);
-                    hasHouse = true;
-                    houseColor = color;
-                } else System.out.println("还没满呢");
-            }
+            hasHouse = true;
+            houseColor = color;
         }
+        return null;
     }
+
 
     public boolean achievedVictory() {
         int fullSets = 0;

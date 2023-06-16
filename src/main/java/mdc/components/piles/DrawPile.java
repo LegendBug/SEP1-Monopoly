@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * 弃牌堆，依托答辩
+ * A pile of cards for the player to draw
  */
 public class DrawPile extends AbstractPile {
     public DrawPile() {
@@ -29,6 +29,9 @@ public class DrawPile extends AbstractPile {
         return cards.remove(cards.size() - 1);
     }
 
+    /**
+     *Remove multiple cards at once
+     */
     public ArrayList<AbstractCard> takeCards(int value) {
         ArrayList<AbstractCard> tempCards = new ArrayList<>();
         for (int k = 0; k < value; k++) {

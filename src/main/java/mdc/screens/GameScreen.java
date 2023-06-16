@@ -9,6 +9,7 @@ import mdc.components.cards.actioncards.RentCard;
 import mdc.components.cards.moneycards.MoneyCard;
 import mdc.components.cards.properties.PropertyCard;
 import mdc.components.players.Player;
+import mdc.states.game.GameInfoBar;
 import mdc.states.game.GamePhases;
 import mdc.states.game.MDCGame;
 import mdc.tools.Config;
@@ -18,12 +19,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  * This class is used to draw components on game screen
+ * This part might look confusing...
  */
 public class GameScreen extends JPanel {
-    // TODO public和private
     public static int screenWidth;
     public static int screenHeight;
     public static Rectangle backgroundRect;
@@ -32,8 +34,9 @@ public class GameScreen extends JPanel {
     public static Rectangle discardRect;
     public static Rectangle selectRect;
     public static Rectangle cancelRect;
+    public static Rectangle infoBarRect;
+
     public static ArrayList<Rectangle> propertyRects = new ArrayList<>();
-    public static ArrayList<Rectangle> opponentRects = new ArrayList<>();
     public static Image play1;
     public static Image play2;
     public static Image play3;
@@ -53,10 +56,6 @@ public class GameScreen extends JPanel {
     private static int cardHeight;
     private static int initialDrawPileX;
     private static int initialDrawPileY;
-    private static int initialBankPileX;
-    private static int initialBankPileY;
-    private static int initialOpponentsPileX;
-    private static int initialOpponentsPileY;
     private static Image desktop;
     private static Image cardBack;
     private static Image birthday;
@@ -130,6 +129,7 @@ public class GameScreen extends JPanel {
         saveRect = new Rectangle(screenWidth * 36 / 48, screenHeight * 23 / 48, screenWidth * 5 / 48, screenHeight * 3 / 48);
         selectRect = new Rectangle(screenWidth * 36 / 48, screenHeight * 23 / 48, screenWidth * 5 / 48, screenHeight * 3 / 48);
         cancelRect = new Rectangle(screenWidth * 42 / 48, screenHeight * 23 / 48, screenWidth * 5 / 48, screenHeight * 3 / 48);
+        infoBarRect = new Rectangle(screenWidth * 30 / 48, screenHeight / 6, screenWidth * 16 / 48, screenHeight * 10 / 48);
         for (int i = 0; i < 10; i++) {
             int row = i / 5 + 1;
             int col = i % 5 + 1;
@@ -224,19 +224,17 @@ public class GameScreen extends JPanel {
         houseProperty = GraphPainter.getImage(config.getImagePath().getHouseProperty());
     }
 
-    private void drawInfo(Graphics2D g2d) {
-        GraphPainter.drawString(g2d, "player:" + game.getCurrPlayer(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 5 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "player:" + game.currPlayerIndex, "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 6 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "phase:" + game.getCurrPhase(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 7 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "draw pile:" + game.getDrawPileNum(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 8 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "curr card:" + game.getCurrCard(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 9 / 48, 200, 100));
-        GraphPainter.drawString(g2d, "curr cards:" + game.getCurrPlayer().getOwnPlayerPile().size(), "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                new Rectangle(screenWidth * 20 / 48, screenHeight * 10 / 48, 200, 100));
+    private void drawInfoBar(Graphics2D g2d) {
+        GameInfoBar gameInfoBar = game.getGameInfoBar();
+        int messageHeight = infoBarRect.height / 6;
+        int index = 0;
+        for (String info : gameInfoBar) {
+            int yPos = infoBarRect.y + infoBarRect.height - (index * messageHeight);
+            // Create a new infoBarRect for this message
+            Rectangle messageRect = new Rectangle(infoBarRect.x, yPos, infoBarRect.width, messageHeight);
+            GraphPainter.drawString(g2d, info, "Courier New", 1, screenHeight / 40, Color.WHITE, 0, messageRect);
+            index++;
+        }
     }
 
     private void drawBackground(Graphics2D g2d) throws IOException {
@@ -260,8 +258,8 @@ public class GameScreen extends JPanel {
     private void drawBankPile(Graphics2D g2d) throws IOException {
         ArrayList<AbstractCard> cards = game.getCurrBankPile().getCards();
         for (int i = 0; i < cards.size(); i++) {
-            int addHeight = (i == game.getCurrBankCardIndex() && game.isSelected()) ? cardHeight / 2 : 0; // 当有卡牌被选择后，将牌举高高
-            boolean toBeSelected = (i == game.getCurrBankCardIndex() && addHeight == 0); // TODO 改变变暗时的判定
+            int addHeight = (i == game.getCurrBankCardIndex() && game.isSelected()) ? cardHeight / 2 : 0;
+            boolean toBeSelected = (i == game.getCurrBankCardIndex() && addHeight == 0);
             Rectangle rect = new Rectangle((cardWidth / 5) * i, screenHeight / 3 - addHeight, cardWidth * 3 / 4, cardHeight * 3 / 4);
             AbstractCard card = cards.get(i);
             Image cardImage = null;
@@ -280,7 +278,6 @@ public class GameScreen extends JPanel {
     }
 
     private void drawCurrentPlayerPile(Graphics2D g2d) throws IOException {
-        // TODO 非出牌玩家卡牌显示背面且不举高高
         ArrayList<AbstractCard> cards = game.getCurrPlayerPile().getCards();
         for (int i = 0; i < cards.size(); i++) {
             int addHeight = (i == game.getCurrPlayerCardIndex() && game.isSelected() && game.getCurrPlayerPile() == game.getCurrPlayer().getOwnPlayerPile()) ? cardHeight * 2 / 3 : 0; // 当有卡牌被选择后，将牌举高高
@@ -349,10 +346,6 @@ public class GameScreen extends JPanel {
                 continue;
             }
             GraphPainter.drawImage(g2d, cardImage, rect, toBeSelected);
-            if (toBeSelected) {
-                GraphPainter.drawString(g2d, "card:" + card, "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
-                        new Rectangle(screenWidth * 25 / 48, screenHeight * 11 / 48, 200, 100));
-            }
         }
     }
 
@@ -380,13 +373,44 @@ public class GameScreen extends JPanel {
                 boolean toBeSelected = (i == game.getCurrOpponentIndex() && game.getCurrPhase() == GamePhases.playPhase);
                 if (toBeSelected) color = Color.RED;
                 else color = Color.WHITE;
-                int currOpponentID = (game.currPlayerIndex + i + 1) % game.getPlayerNum();
-                GraphPainter.drawString(g2d, currOpponentID + "  player pile: " + player.getOwnPlayerPile().size(),
+                int realOpponentIndex = (game.currPlayerIndex + i + 1) % game.getPlayerNum();
+                // 打印玩家名称
+                GraphPainter.drawString(g2d, String.valueOf(realOpponentIndex),
                         "Courier New", 1, screenHeight / 32, color, 0,
                         new Rectangle(i * screenWidth / 4, 0, screenWidth / 4, screenHeight / 6));
-                GraphPainter.drawString(g2d, currOpponentID + "  bank pile: " + player.getOwnBank().getMoney() + " " + player.getOwnBank().size(),
-                        "Courier New", 1, screenHeight / 32, color, 0,
-                        new Rectangle(i * screenWidth / 4, screenWidth / 48, screenWidth / 4, screenHeight / 6));
+                // 打印手牌数量
+                GraphPainter.drawString(g2d, "Hand Cards: " + player.getOwnPlayerPile().size(),
+                        "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                        new Rectangle(i * screenWidth / 4, screenHeight / 48, screenWidth / 4, screenHeight / 6));
+                // 打印银行钱数
+                GraphPainter.drawString(g2d, "Deposit: " + player.getOwnBank().getMoney(),
+                        "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                        new Rectangle(i * screenWidth / 4, 2 * screenHeight / 48, screenWidth / 4, screenHeight / 6));
+                // 打印房产数量
+                GraphPainter.drawString(g2d, "Properties: ",
+                        "Courier New", 1, screenHeight / 32, Color.WHITE, 0,
+                        new Rectangle(i * screenWidth / 4, 3 * screenHeight / 48, screenWidth / 4, screenHeight / 6));
+                int j = 1;
+                Map<CardColor, Integer> propertySizes = player.getOwnProperty().getPropertySizes();
+                for (Map.Entry<CardColor, Integer> ps : propertySizes.entrySet()) {
+                    Color col = switch (ps.getKey()) {
+                        case darkBlue -> Color.BLUE;
+                        case brown -> new Color(139, 69, 19); // 棕色
+                        case utility -> new Color(144, 238, 144); // 浅绿色
+                        case green -> Color.GREEN;
+                        case yellow -> Color.YELLOW;
+                        case red -> Color.RED;
+                        case orange -> Color.ORANGE;
+                        case pink -> Color.PINK;
+                        case lightBlue -> Color.CYAN; // 浅蓝色
+                        case railRoad -> Color.BLACK; // 黑色
+                        default -> Color.WHITE;
+                    };
+                    GraphPainter.drawString(g2d, ps.getValue().toString(),
+                            "Courier New", 1, screenHeight / 32, col, 0,
+                            new Rectangle(i * screenWidth / 4 + j * screenWidth / 96 + screenWidth / 9, 3 * screenHeight / 48, screenWidth / 4, screenHeight / 6));
+                    j++;
+                }
                 i++;
             }
         }
@@ -396,7 +420,7 @@ public class GameScreen extends JPanel {
         Graphics2D g2d = (Graphics2D) g.create();
         try {
             drawBackground(g2d);
-            drawInfo(g2d);
+            drawInfoBar(g2d);
             drawButton(g2d);
             drawDrawPile(g2d);
             drawBankPile(g2d);

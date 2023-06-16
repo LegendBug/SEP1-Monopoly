@@ -7,15 +7,9 @@ import mdc.components.players.Player;
 import mdc.states.game.MDCGame;
 
 /**
- * 摸两张
- *
- * @para name:名字
- * @para turnMoney:放入银行多少钱
- * @para value:发几张牌
- * @para isActing:判断当前行动卡是否在生效
+ * get two cards
  */
 public class PassGo extends AbstractActionCard {
-
     public PassGo(int turnMoney) {
         super(turnMoney);
         this.needOwnPile = true;

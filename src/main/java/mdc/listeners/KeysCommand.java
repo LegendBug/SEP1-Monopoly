@@ -13,5 +13,7 @@ public interface KeysCommand {
 
     boolean hasPressedLeft();
 
+    boolean hasPressedSpace();
+
     void resetKeyPresses();
 }

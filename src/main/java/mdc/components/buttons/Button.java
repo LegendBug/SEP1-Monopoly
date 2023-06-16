@@ -2,11 +2,14 @@ package mdc.components.buttons;
 
 import java.awt.*;
 
+/**
+ * The button class controlled in the game
+ */
 public class Button {
-    private Rectangle rect;
-    private Image normal;
-    private Image hover;
-    private Image pressed;
+    private final Rectangle rect;
+    private final Image normal;
+    private final Image hover;
+    private final Image pressed;
     private ButtonStates state;
     private boolean ifSelected;
     private boolean ifActive;
@@ -17,8 +20,8 @@ public class Button {
         this.hover = hover;
         this.pressed = pressed;
         this.state = ButtonStates.NORMAL;
-        this.ifSelected = false; // 是否有且仅有当前按键被选择（由外界控制，对内使用）
-        this.ifActive = false; // 按键是否被激活
+        this.ifSelected = false; // Whether any and only the current key is selected (externally controlled, internally used)
+        this.ifActive = false; // Whether the key is activated
     }
 
     public Rectangle getRect() {
@@ -58,24 +61,24 @@ public class Button {
     }
 
     /**
-     * 控制按键当前状态
-     * @param mousePoint 鼠标坐标
-     * @param ifPressed 鼠标点击
-     * @param ifReleased 鼠标释放
-     * @param ifEnter 按下回车
-     * @return 当鼠标在按键之上时，返回true
+     * Control the current status of the key
+     * @param mousePoint Mouse coordinates
+     * @param ifPressed mouse click
+     * @param ifReleased Mouse release
+     * @param ifEnter Press Enter
+     * @return Returns true when the mouse is over the key
      */
     public boolean checkForState(Point mousePoint, boolean ifPressed, boolean ifReleased, boolean ifEnter) {
         if (mousePoint != null && this.rect.contains(mousePoint)) {
-            if (ifPressed) this.state = ButtonStates.PRESSED; // 鼠标按下，按压
-            else this.state = ButtonStates.HOVER; // 鼠标停留，停留
-            if (ifReleased || ifEnter) ifActive = true; // 鼠标放开或按下回车，执行
-            return true; // 鼠标在范围内，返回true
+            if (ifPressed) this.state = ButtonStates.PRESSED; // Mouse down, press
+            else this.state = ButtonStates.HOVER; // Mouse stay, stay
+            if (ifReleased || ifEnter) ifActive = true; // Release the mouse or press Enter to go
+            return true; // With mouse in range, return true
         } else {
-            if (this.ifSelected) { // 鼠标不在按钮上，控制权留给按键
-                if (ifEnter) this.ifActive = true; // 回车被按下，执行
-                else this.state = ButtonStates.HOVER; // 按键为选中状态，停留
-            } else this.state = ButtonStates.NORMAL; // 未选中，正常状态
+            if (this.ifSelected) { //
+                if (ifEnter) this.ifActive = true; // The mouse is not on the button, control is left to the button
+                else this.state = ButtonStates.HOVER; // Press the button to select and stay
+            } else this.state = ButtonStates.NORMAL; // If no, the status is normal
         }
         return false;
     }

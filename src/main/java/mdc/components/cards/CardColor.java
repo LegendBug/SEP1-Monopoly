@@ -1,5 +1,8 @@
 package mdc.components.cards;
 
+/**
+ * The color of all cards
+ */
 public enum CardColor {
     darkBlue, brown, utility, green, yellow, red, orange, pink, lightBlue, railRoad,
     darkBlue_green,  utility_railRoad, lightBlue_brown, pink_orange, red_yellow,

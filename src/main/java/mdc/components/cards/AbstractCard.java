@@ -1,16 +1,18 @@
 package mdc.components.cards;
 
 import mdc.components.buttons.Button;
-import mdc.components.piles.DrawPile;
 import mdc.states.game.MDCGame;
 
 import java.util.ArrayList;
 
+/**
+ * The parent class of all cards
+ */
 public abstract class AbstractCard implements ICard {
-    protected int turnMoney; // 面值
-    protected boolean isPhaseOver; // 卡牌行动是否结束
-    protected boolean isPayable; // 是否可作为钱
-    protected boolean isMoney; // 是否为钱
+    protected int turnMoney; // face value
+    protected boolean isPhaseOver; // Whether the card operation is over
+    protected boolean isPayable; // Whether it can be used as money
+    protected boolean isMoney; // Whether it is money or not
 
     protected CardPhase phase;
 
@@ -33,14 +35,18 @@ public abstract class AbstractCard implements ICard {
         return isPhaseOver;
     }
 
+    /**
+     * The method used to perform all action card functions
+     * @param game Game master object
+     */
     public void play(MDCGame game) {
         ArrayList<Button> buttons = game.getButtons();
         Button saveButton = game.getSaveButton();
-        if (phase == CardPhase.waitingPhase) { // 控制等待阶段
+        if (phase == CardPhase.waitingPhase) { // Control wait phase
             if (isPayable) {
-                if (!buttons.contains(saveButton)) buttons.add(saveButton); // 可当做卡牌加入存钱按键
+                if (!buttons.contains(saveButton)) buttons.add(saveButton); // Add a save button as a card
                 else if (saveButton.isIfActive()) {
-                    isPhaseOver = true; // 点击了存钱按键，结束
+                    isPhaseOver = true; // Hit the save button. It's over
                     saveButton.resetButton();
                 }
             } else buttons.remove(saveButton);
@@ -49,16 +55,6 @@ public abstract class AbstractCard implements ICard {
 
     public boolean isPayable() {
         return isPayable;
-    }
-
-    @Override
-    public void discard(DrawPile pile) {
-
-    }
-
-    @Override
-    public void deal(DrawPile pile) {
-
     }
 
     public void resetCard() {

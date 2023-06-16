@@ -1,8 +1,11 @@
 package mdc.components.cards;
 
+/**
+ * Phases of all cards
+ */
 public enum CardPhase {
     waitingPhase, ownPropertyPhase, ownPilePhase,
     chooseOpponentsPhase,
-    otherPilePhase, //出无懈可击
+    otherPilePhase,
     otherBankPhase, otherPropertyPhase
 }

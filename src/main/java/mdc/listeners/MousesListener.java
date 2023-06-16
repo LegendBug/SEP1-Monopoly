@@ -9,7 +9,7 @@ import java.awt.event.MouseMotionListener;
  This class is used to control the keys that need to be pressed in the game screen
  */
 public class MousesListener implements MousesCommand, MouseListener, MouseMotionListener {
-    private boolean ifClicked, ifPressed, ifReleased, ifEntered, ifExit;
+    private boolean ifClicked, ifPressed, ifReleased;
     private Point mousePoint;
 
     @Override
@@ -31,14 +31,10 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        ifEntered = true;
-        ifExit = false;
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        ifExit = true;
-        ifEntered = false;
     }
 
     @Override
@@ -65,16 +61,6 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
     }
 
     @Override
-    public boolean hasEnteredButton1() {
-        return ifEntered;
-    }
-
-    @Override
-    public boolean hasExitButton1() {
-        return ifExit;
-    }
-
-    @Override
     public Point getMousePoint() {
         return mousePoint;
     }
@@ -84,8 +70,6 @@ public class MousesListener implements MousesCommand, MouseListener, MouseMotion
         ifClicked = false;
         ifPressed = false;
         ifReleased = false;
-        ifEntered = false;
-        ifExit = false;
     }
 
     public boolean[] getBos() {

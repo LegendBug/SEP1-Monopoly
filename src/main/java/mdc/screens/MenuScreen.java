@@ -24,16 +24,12 @@ public class MenuScreen extends JPanel {
     public static Image exit1;
     public static Image exit2;
     public static Image exit3;
-    public static Image history1;
-    public static Image history2;
-    public static Image history3;
     public final Rectangle mdcLogo1;
     public final Rectangle mdcLogo2;
     public final Rectangle mdcLogo3;
     public final Rectangle mdcLogo4;
     public final Rectangle mdcLogo5;
     public final Rectangle mdcLogo6;
-    // TODO 将所有的Rectangle加入Config
     public final Rectangle backgroundRect;
     public final Image background;
     private final int screenResolution;
@@ -55,9 +51,6 @@ public class MenuScreen extends JPanel {
         exit1 = GraphPainter.getImage(config.getImagePath().getExit1());
         exit2 = GraphPainter.getImage(config.getImagePath().getExit2());
         exit3 = GraphPainter.getImage(config.getImagePath().getExit3());
-        history1 = GraphPainter.getImage(config.getImagePath().getHistory1());
-        history2 = GraphPainter.getImage(config.getImagePath().getHistory2());
-        history3 = GraphPainter.getImage(config.getImagePath().getHistory3());
 
         mdcLogo1 = new Rectangle(screenWidth * 3 / 16 - 3, screenHeight * 31 / 48 - 10, screenWidth / 3, screenHeight * 5 / 48);
         mdcLogo2 = new Rectangle(screenWidth * 3 / 16 + 5, screenHeight * 31 / 48 - 4, screenWidth / 3, screenHeight * 5 / 48);

@@ -3,12 +3,7 @@ package mdc.components.cards.actioncards;
 import mdc.states.game.MDCGame;
 
 /**
- * 放在成套的土地上收租加租金
- *
- * @para name:名字
- * @para turnMoney:放入银行多少钱
- * @para value:加多少钱
- * @para isActing:判断当前行动卡是否在生效
+ * On a set of land for rent and rent
  */
 public class Hotel extends House {
     protected int addRent;

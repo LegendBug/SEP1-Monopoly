@@ -8,16 +8,12 @@ import mdc.states.game.MDCGame;
 import java.util.Stack;
 
 /**
- * 指定一个玩家交换一个不成套的
- *
- * @para name:名字
- * @para turnMoney:放入银行多少钱
- * @para isActing:判断当前行动卡是否在生效
+ * Assign a player to swap an un-full-set one
  */
 public class ForceDeal extends DealBreaker {
-    protected CardColor ownColor;
-    protected CardColor opponentColor;
-    protected Stack<PropertyCard> ownProperty; // 出牌者提供交换的牌
+    protected CardColor ownColor; // The player selects the color of the property
+    protected CardColor opponentColor; // Select the color of the other person's property
+    protected Stack<PropertyCard> ownProperty; // The player offers the property in exchange
 
     public ForceDeal(int turnMoney) {
         super(turnMoney);
@@ -30,26 +26,29 @@ public class ForceDeal extends DealBreaker {
         if (!isPhaseOver) {
             super.play(game);
             if (phase == CardPhase.ownPropertyPhase && game.getSelectButton().isIfActive()) {
-                // 选择自己要交换的房产
+                // Choose the property you want to swap
                 ownColor = game.getColors().get(game.getCurrPropertyIndex());
                 if (game.getCurrPlayer().getOwnProperty().getProperty(ownColor).size() != 0) {
                     while (!game.getCurrPlayer().getOwnProperty().getProperty(ownColor).isEmpty())
                         ownProperty.add(game.getCurrPlayer().getOwnProperty().getProperty(ownColor).pop());
                     phase = CardPhase.chooseOpponentsPhase;
                 } else {
+                    game.getGameInfoBar().add("The current property is empty！");
                     isPhaseOver = true;
-                    System.out.println("当前房产为空");
                 }
                 game.getSelectButton().resetButton();
             } else if (phase == CardPhase.otherPropertyPhase && game.getSelectButton().isIfActive()) {
-                // 交换房产
+                // Exchange property
                 int cardIndex = game.getCurrPropertyIndex();
-                opponentColor = game.getColors().get(cardIndex); // 获取对手选中的房产颜色
-                game.getCurrPlayer().getOwnProperty().clear(opponentColor); // 清除玩家要加入卡牌颜色的房产
-                tempOpponent.getOwnProperty().takeProperty(opponentColor, game.getCurrPlayer().getOwnProperty(), needFullSet); // 将对手房产加入房产
-
-                tempOpponent.getOwnProperty().clear(ownColor);// 清除对手被加入的房产
-                tempOpponent.getOwnProperty().addCards(ownProperty); // 加入玩家提供的房产
+                opponentColor = game.getColors().get(cardIndex); // Gets the property color selected by your opponent
+                game.getCurrPlayer().getOwnProperty().clear(opponentColor); // Clears properties that the player wants to add card colors to
+                // Adds rival properties to the property
+                if (tempOpponent.getOwnProperty().takeProperty(opponentColor, game.getCurrPlayer().getOwnProperty(), needFullSet)) {
+                    game.getGameInfoBar().add("You traded " + ownColor +
+                            " property for Player " + game.getPlayerIndex(tempOpponent) + "'s " + color + " one!");
+                } else game.getGameInfoBar().add("This property is empty!");
+                tempOpponent.getOwnProperty().clear(ownColor);// Clear properties that opponents have been added to
+                tempOpponent.getOwnProperty().addCards(ownProperty); // Join player-provided properties
                 game.getSelectButton().resetButton();
                 isPhaseOver = true;
             }

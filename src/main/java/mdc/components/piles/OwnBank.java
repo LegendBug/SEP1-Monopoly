@@ -6,7 +6,7 @@ import mdc.components.cards.ICard;
 import java.util.ArrayList;
 
 /**
- * 玩家银行
+ * The bank pile, which stores the player's money
  */
 public class OwnBank extends OwnPlayerPile {
     private int money;
@@ -48,5 +48,4 @@ public class OwnBank extends OwnPlayerPile {
     public int getMoney() {
         return money;
     }
-
 }

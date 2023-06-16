@@ -3,12 +3,7 @@ package mdc.components.cards.actioncards;
 import mdc.states.game.MDCGame;
 
 /**
- * 指定一个人给赔钱
- *
- * @para name:名字
- * @para turnMoney:放入银行多少钱
- * @para isActing:判断当前行动卡是否在生效
- * @para payValue:赔多少钱
+ * DebtCollector, designates a player to give money. Inherited from Birthday
  */
 
 public class DebtCollector extends Birthday {

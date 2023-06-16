@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
+/**
+ * An abstract class for the deck
+ */
 public class AbstractPile {
     protected ArrayList<AbstractCard> cards;
 

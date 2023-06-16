@@ -11,11 +11,11 @@
       "SlyDeal": "3 3",
       "ForceDeal": "4 3",
       "DebtCollector": "3 3",
-      "Birthday": "30 2",
+      "Birthday": "3 2",
       "PassGo": "10 1",
       "House": "3 2",
       "Hotel": "3 4",
-      "DoubleRent": "20 1"
+      "DoubleRent": "2 1"
     },
     "moneyCards": {
       "M1": 6,
@@ -26,9 +26,9 @@
       "M10": 1
     },
     "properties": {
-      "darkBlue": "120 4 3 8",
-      "brown": "120 1 1 2",
-      "utility": "120 2 1 2",
+      "darkBlue": "2 4 3 8",
+      "brown": "2 1 1 2",
+      "utility": "2 2 1 2",
       "green": "3 4 2 4 7",
       "yellow": "3 3 2 4 6",
       "red": "3 3 2 3 6",
@@ -50,8 +50,8 @@
       "utility_railRoad": "2 1",
       "lightBlue_brown": "2 1",
       "pink_orange": "2 1",
-      "red_yellow": "20 1",
-      "multiRent": "30 3"
+      "red_yellow": "2 1",
+      "multiRent": "3 3"
     }
   },
   "rectangle": {
@@ -77,9 +77,6 @@
     "cancel1": "src/main/resources/picture/button/cancel1.png",
     "cancel2": "src/main/resources/picture/button/cancel2.png",
     "cancel3": "src/main/resources/picture/button/cancel3.png",
-    "history1": "src/main/resources/picture/button/history1.png",
-    "history2": "src/main/resources/picture/button/history2.png",
-    "history3": "src/main/resources/picture/button/history3.png",
     "save1": "src/main/resources/picture/button/save1.png",
     "save2": "src/main/resources/picture/button/save2.png",
     "save3": "src/main/resources/picture/button/save3.png",
@@ -143,6 +140,7 @@
     "hotelProperty": "src/main/resources/picture/game/property/hotelProperty.png",
     "houseProperty": "src/main/resources/picture/game/property/houseProperty.png",
 
-    "cardBack": "src/main/resources/picture/game/cardBack.png"
+    "cardBack": "src/main/resources/picture/game/cardBack.png",
+    "frame": "src/main/resources/picture/game/frame.png"
   }
 }

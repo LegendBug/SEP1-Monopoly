@@ -1,18 +1,18 @@
 package mdc.states.game;
 
 import mdc.components.buttons.Button;
-import mdc.components.cards.*;
+import mdc.components.cards.AbstractCard;
+import mdc.components.cards.CardColor;
 import mdc.components.cards.actioncards.AbstractActionCard;
 import mdc.components.cards.actioncards.RentCard;
 import mdc.components.cards.moneycards.MoneyCard;
 import mdc.components.cards.properties.AbstractPropertyCard;
 import mdc.components.cards.properties.PropertyCard;
 import mdc.components.cards.properties.PropertyWildCard;
-import mdc.components.piles.ActionPile;
 import mdc.components.piles.DrawPile;
 import mdc.components.piles.OwnBank;
-import mdc.components.piles.OwnProperty;
 import mdc.components.piles.OwnPlayerPile;
+import mdc.components.piles.OwnProperty;
 import mdc.components.players.Player;
 import mdc.listeners.KeysListener;
 import mdc.listeners.MousesListener;
@@ -20,59 +20,55 @@ import mdc.screens.GameScreen;
 import mdc.states.State;
 import mdc.tools.Config;
 
-import java.awt.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
+/**
+ * This is the main control class of the game. Used to control different stages of the game.
+ * The two most important methods are startState and updateState
+ */
 public class MDCGame implements State, Game {
-    private int playerNum;
-    private int playedCardNum;
-    private int roundNum;
-    private int currTime;
+    private final KeysListener keysListener;// Listener for keyboard inputs
+    private final MousesListener mousesListener;// Listener for mouse inputs
+    private final ArrayList<CardColor> colors = new ArrayList<>();// List of card colors
+    private final Config config;// Game configuration
+    public int currPlayerIndex;// Index of the current player
+    public int currOpponentIndex;// Index of the selected opponent
+    boolean[] keysListenerBos;
+    boolean[] mouseListenerBos;
+    private int playerNum;// Number of players
+    private int playedCardNum;// Number of cards played in a round
+    private int roundNum; // Current round number
     private int currButton;
-    private int currPropertyIndex; // 相当于index
+    private int currPropertyIndex;
     private int currBankCardIndex;
     private int currPlayerCardIndex;
-    public int currPlayerIndex;
-    public int currOpponentIndex;
-    public int tempPlayer;
-
     private AbstractCard currCard;
     private Player currPlayer;
     private Player[] players;
-
     private Button playButton;
     private Button saveButton;
     private Button selectButton;
     private Button cancelButton;
     private Button discardButton;
     private ArrayList<Button> buttons;
-
     private GamePhases lastPhase;
     private GamePhases currPhase;
-
+    private GameInfoBar gameInfoBar;
     private OwnPlayerPile currPlayerPile;
     private OwnBank currBankPile;
     private OwnProperty currPropertyPile;
-    private ActionPile actionPile;
     private DrawPile drawPile;
-    private DrawPile discardPile;
-    // TODO 添加2~5人玩家的功能
     private boolean isPause;
     private boolean isSelected;
     private boolean isPhaseOver;
-    private boolean isActionPhase;
     private boolean isSelectPhase;
     private boolean isStateOver;
-    boolean[] keysListenerBos;
-    boolean[] mouseListenerBos;
 
-    private final KeysListener keysListener;
-    private final MousesListener mousesListener;
-    private final ArrayList<CardColor> colors = new ArrayList<>();
     {
         colors.add(CardColor.brown);
         colors.add(CardColor.darkBlue);
@@ -85,21 +81,18 @@ public class MDCGame implements State, Game {
         colors.add(CardColor.utility);
         colors.add(CardColor.yellow);
     }
-    private final Config config;
 
     public MDCGame(KeysListener keysListener, MousesListener mousesListener, Config config) {
         this.config = config;
         this.keysListener = keysListener;
         this.mousesListener = mousesListener;
-        // TODO 优化初始化
     }
 
     @Override
     public void startState() {
-        this.playerNum = 4; // TODO 改变游戏人数
+        this.playerNum = 5; // TODO Change number of players
         this.playedCardNum = 0;
         this.roundNum = 1;
-        this.currTime = 0;
         this.currButton = -1;
         this.currOpponentIndex = -1;
         this.currBankCardIndex = -1;
@@ -119,10 +112,11 @@ public class MDCGame implements State, Game {
 
         this.lastPhase = null;
         this.currPhase = GamePhases.drawPhase;
+        this.gameInfoBar = new GameInfoBar(6);
+        this.gameInfoBar.add("Press Enter to start.");
 
         this.isPause = true;
         this.isPhaseOver = false;
-        this.isActionPhase = false;
         this.isSelected = false;
         this.isSelectPhase = false;
         createPlayers();
@@ -136,7 +130,6 @@ public class MDCGame implements State, Game {
             listenerController();
             phaseController();
             checkForWinner();
-            currTime++;
         }
     }
 
@@ -170,6 +163,10 @@ public class MDCGame implements State, Game {
         return currBankCardIndex;
     }
 
+    public void setCurrBankCardIndex(int index) {
+        currBankCardIndex = index;
+    }
+
     public int getCurrPlayerCardIndex() {
         return currPlayerCardIndex;
     }
@@ -190,20 +187,41 @@ public class MDCGame implements State, Game {
         return currPlayerPile;
     }
 
+    public void setCurrPlayerPile(OwnPlayerPile currPlayerPile) {
+        this.currPlayerPile = currPlayerPile;
+    }
+
     public OwnBank getCurrBankPile() {
         return currBankPile;
+    }
+
+    public void setCurrBankPile(OwnBank currBankPile) {
+        this.currBankPile = currBankPile;
     }
 
     public OwnProperty getCurrPropertyPile() {
         return currPropertyPile;
     }
 
+    public void setCurrPropertyPile(OwnProperty currPropertyPile) {
+        this.currPropertyPile = currPropertyPile;
+    }
+
     public int getCurrOpponentIndex() {
         return currOpponentIndex;
     }
 
-    public int getCurrPlayerIndex() {
-        return currPlayerIndex;
+    public void setCurrOpponentIndex(int index) {
+        currOpponentIndex = index;
+    }
+
+    public int getPlayerIndex(Player player) {
+        for (int i = 0; i < players.length; i++) {
+            if (players[i].equals(player)) {
+                return i; // Returns the index of the current player in the array
+            }
+        }
+        return -1; // If no match is found, -1 is returned to indicate no match
     }
 
     public Player getCurrPlayer() {
@@ -230,10 +248,6 @@ public class MDCGame implements State, Game {
         return cancelButton;
     }
 
-    public Button getDiscardButton() {
-        return discardButton;
-    }
-
     public ArrayList<Button> getButtons() {
         return buttons;
     }
@@ -258,36 +272,16 @@ public class MDCGame implements State, Game {
         return this.drawPile.size();
     }
 
-    public int getBankPileNum() {
-        return this.currBankPile.size();
-    }
-
     public GamePhases getCurrPhase() {
         return currPhase;
     }
 
-    public void setCurrOpponentIndex(int index) {
-        currOpponentIndex = index;
-    }
-
-    public void setCurrBankCardIndex(int index) {
-        currBankCardIndex = index;
-    }
-
-    public void setCurrPlayerPile(OwnPlayerPile currPlayerPile) {
-        this.currPlayerPile = currPlayerPile;
-    }
-
-    public void setCurrBankPile(OwnBank currBankPile) {
-        this.currBankPile = currBankPile;
-    }
-
-    public void setCurrPropertyPile(OwnProperty currPropertyPile) {
-        this.currPropertyPile = currPropertyPile;
+    public GameInfoBar getGameInfoBar() {
+        return gameInfoBar;
     }
 
     private void createPlayers() {
-        // 手牌堆、银行牌堆、房产牌堆顺带创建了
+        // Hand pile, bank pile, and real estate pile were created in parallel
         for (int i = 0; i < playerNum; i++) {
             OwnPlayerPile playerPile = new OwnPlayerPile();
             OwnBank bankPile = new OwnBank();
@@ -298,17 +292,14 @@ public class MDCGame implements State, Game {
     }
 
     private void createPiles() {
-        this.actionPile = new ActionPile();
-        // 加入抽牌堆
+        // Add to the draw pile
         this.drawPile = new DrawPile();
         createActionCards();
         createMoneyCards();
         createProperties();
         createRentCards();
         this.drawPile.shuffle();
-        // 加入弃牌堆
-        this.discardPile = new DrawPile();
-        // 设置当前玩家牌堆
+        // Sets the current player's deck
         this.currPlayerPile = currPlayer.getOwnPlayerPile();
         this.currBankPile = currPlayer.getOwnBank();
         this.currPropertyPile = currPlayer.getOwnProperty();
@@ -317,16 +308,16 @@ public class MDCGame implements State, Game {
     private void createActionCards() {
         String packageName = "mdc.components.cards.actioncards.";
         Config.GameInfo.ActionCards actionCardsInfo = config.getGameInfo().getActionCards();
-        Field[] fields = Config.GameInfo.ActionCards.class.getDeclaredFields(); // 使用映射
+        Field[] fields = Config.GameInfo.ActionCards.class.getDeclaredFields(); // Use mapping
         for (Field field : fields) {
             field.setAccessible(true);
             try {
-                String[] info = field.get(actionCardsInfo).toString().split(" "); // 获取映射中config的数据
-                String className = packageName + field.getName(); // 类名和字段名相同，所以直接使用field.getName()
-                Class<?> cardClass = Class.forName(className); // 加载类
+                String[] info = field.get(actionCardsInfo).toString().split(" "); // Gets data from config in the mapping
+                String className = packageName + field.getName(); // The class name is the same as the field name, so use field.getname () directly
+                Class<?> cardClass = Class.forName(className); //Load class
                 for (int i = 0; i < Integer.parseInt(info[0]); i++) {
                     AbstractActionCard card = (AbstractActionCard) cardClass.getConstructor(int.class).newInstance(Integer.parseInt(info[1])); // 创建卡牌对象
-                    this.drawPile.addCard(card); // 添加入卡牌
+                    this.drawPile.addCard(card); // Add cards
                 }
             } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InstantiationException |
                      InvocationTargetException e) {
@@ -363,15 +354,15 @@ public class MDCGame implements State, Game {
             field.setAccessible(true);
             try {
                 String fieldName = field.getName();
-                if (fieldName.split("_").length == 1) { // 添加单色牌
+                if (fieldName.split("_").length == 1) { // Add monochrome
                     CardColor color = CardColor.valueOf(fieldName);
                     String[] info = field.get(propertiesInfo).toString().split(" ");
-                    colorInfo.put(color, info); // 将单色牌信息加入Map中，便于后续创卡
+                    colorInfo.put(color, info); // Add monochrome card information to Map for subsequent card creation
                     createPropertyCards(color, info);
-                } else if (fieldName.equals("multi_property")) { // 添加全色牌
+                } else if (fieldName.equals("multi_property")) { //Add full color cards
                     int num = (int) field.get(propertiesInfo);
                     for (int i = 0; i < num; i++) createMultiPropertyCard(colorInfo);
-                } else if (fieldName.split("_").length == 2) { // 添加双色牌
+                } else if (fieldName.split("_").length == 2) { // Add two-color cards
                     String[] colors = fieldName.split("_");
                     String[] info = field.get(propertiesInfo).toString().split(" ");
                     CardColor color1 = CardColor.valueOf(colors[0]);
@@ -388,7 +379,7 @@ public class MDCGame implements State, Game {
 
     private void createMultiPropertyCard(Map<CardColor, String[]> colorInfo) {
         ArrayList<PropertyCard> cards = new ArrayList<>();
-        for (Map.Entry<CardColor, String[]> entry : colorInfo.entrySet()) { // 遍历全部单色，创建单色卡，全部加入全色卡中
+        for (Map.Entry<CardColor, String[]> entry : colorInfo.entrySet()) { // Go through all the monochrome, create a single color card, add all to the full color card
             CardColor color = entry.getKey();
             String[] info = entry.getValue();
             int[] values = new int[info.length - 1];
@@ -461,7 +452,8 @@ public class MDCGame implements State, Game {
                 String fieldName = field.getName();
                 String[] info = field.get(rentCardsInfo).toString().split(" ");
                 if (fieldName.equals("multiRent")) {
-                    for (int i = 0; i < Integer.parseInt(info[0]); i++) this.drawPile.addCard(new RentCard(Integer.parseInt(info[1])));
+                    for (int i = 0; i < Integer.parseInt(info[0]); i++)
+                        this.drawPile.addCard(new RentCard(Integer.parseInt(info[1])));
                 } else {
                     String[] colors = field.getName().split("_");
                     CardColor color1 = CardColor.valueOf(colors[0]);
@@ -490,30 +482,30 @@ public class MDCGame implements State, Game {
     private void runPlayCardsPhase() {
         if (playedCardNum < 3) {
             if (!isSelected) isSelectPhase = true;
-            else  {
+            else {
                 currCard = currPlayer.getOwnPlayerPile().getCards().get(currPlayerCardIndex);
-                // 监听事件
+                // Listening event
                 buttonController();
-                // 执行卡牌
+                // Executive card
                 currCard.play(this);
-                // 执行卡牌不同时期 运行后的行动
+                // Perform the actions of the card after different periods of operation
                 switch (currCard.getPhase()) {
                     case waitingPhase -> {
                         if (cancelButton.isIfActive()) {
                             cancelButton.resetButton();
                             isSelected = false;
                         }
-                        // 判断出牌是否结束
+                        //Determine if the card is over
                         if (currCard.isPhaseOver()) {
                             currCard.resetCard();
-                            currPlayerPile.takeCard(currPlayerCardIndex, currBankPile); // 移除卡牌
+                            currPlayerPile.takeCard(currPlayerCardIndex, currBankPile); // Remove cards
                             currPlayerCardIndex = currPlayerPile.size() - 1;
                             playedCardNum++;
                             isSelected = false;
                         }
                     }
                     case chooseOpponentsPhase -> {
-                        // 选择敌方玩家
+                        // Select enemy players
                         int currOpponents = getPlayerNum() - 1;
                         if (keysListenerBos[5])
                             currOpponentIndex = (currOpponentIndex == -1 || currOpponentIndex == 0) ? currOpponents - 1 : currOpponentIndex - 1;
@@ -521,17 +513,17 @@ public class MDCGame implements State, Game {
                             currOpponentIndex = (currOpponentIndex + 1) % currOpponents;
                     }
                     case ownPropertyPhase -> {
-                        // 选择property
+                        // choose property
                         if (keysListenerBos[4])
                             currPropertyIndex = (currPropertyIndex == -1 || currPropertyIndex == 0) ? 9 : currPropertyIndex - 1;
                         else if (keysListenerBos[5])
                             currPropertyIndex = (currPropertyIndex + 1) % 10;
-                        // 判断出牌是否结束
+                        // Determine if the card is over
                         if (currCard.isPhaseOver()) {
                             currCard.resetCard();
-                            if (currCard instanceof PropertyCard) // 将房产牌加入房产
+                            if (currCard instanceof PropertyCard) // Add the property tag to the property
                                 currPlayerPile.takeCard(currPlayerCardIndex, currPropertyPile);
-                            else if (currCard instanceof AbstractActionCard) // 是行动牌，移除
+                            else if (currCard instanceof AbstractActionCard) // It's an action card. Remove it
                                 currPlayerPile.removeCard(currPlayerCardIndex);
                             currPlayerCardIndex = currPlayerPile.size() - 1;
                             currPropertyIndex = -1;
@@ -540,7 +532,7 @@ public class MDCGame implements State, Game {
                         }
                     }
                     case otherBankPhase -> {
-                        // 在敌方玩家银行中选择卡牌
+                        // Select a card in the enemy player's bank
                         int currCards = currBankPile.size();
                         if (keysListenerBos[5])
                             currBankCardIndex = (currBankCardIndex == -1 || currBankCardIndex == 0) ? currCards - 1 : currBankCardIndex - 1;
@@ -550,12 +542,11 @@ public class MDCGame implements State, Game {
                             currBankCardIndex = 0;
                         if (currCard.isPhaseOver()) {
                             currCard.resetCard();
-                            System.out.println("over");
                             currPlayerPile = currPlayer.getOwnPlayerPile();
                             currBankPile = currPlayer.getOwnBank();
                             currPropertyPile = currPlayer.getOwnProperty();
 
-                            currPlayerPile.removeCard(currPlayerCardIndex); // 移除该行动牌
+                            currPlayerPile.removeCard(currPlayerCardIndex); // Remove the action card
                             currPlayerCardIndex = currPlayerPile.size() - 1;
                             currOpponentIndex = -1;
                             currBankCardIndex = -1;
@@ -565,7 +556,7 @@ public class MDCGame implements State, Game {
                         }
                     }
                     case otherPropertyPhase -> {
-                        // 在敌方玩家房产中选择
+                        // Choose from enemy player properties
                         if (keysListenerBos[4])
                             currPropertyIndex = (currPropertyIndex == -1 || currPropertyIndex == 0) ? 9 : currPropertyIndex - 1;
                         else if (keysListenerBos[5])
@@ -580,7 +571,7 @@ public class MDCGame implements State, Game {
                             currBankPile = currPlayer.getOwnBank();
                             currPropertyPile = currPlayer.getOwnProperty();
 
-                            currPlayerPile.removeCard(currPlayerCardIndex); // 移除该行动牌
+                            currPlayerPile.removeCard(currPlayerCardIndex); // Remove the action card
                             currPlayerCardIndex = currPlayerPile.size() - 1;
                             currOpponentIndex = -1;
                             currPropertyIndex = -1;
@@ -591,7 +582,7 @@ public class MDCGame implements State, Game {
                     case ownPilePhase -> {
                         if (currCard.isPhaseOver()) {
                             currCard.resetCard();
-                            currPlayerPile.removeCard(currPlayerCardIndex); // 移除该行动牌
+                            currPlayerPile.removeCard(currPlayerCardIndex); // Remove the action card
                             currPlayerCardIndex = currPlayerPile.size() - 1;
                             currPropertyIndex = -1;
                             playedCardNum++;
@@ -600,7 +591,6 @@ public class MDCGame implements State, Game {
                     }
                 }
             }
-
         } else {
             isPhaseOver = true;
         }
@@ -614,9 +604,8 @@ public class MDCGame implements State, Game {
                 if (cancelButton.isIfActive()) {
                     cancelButton.setActive(false);
                     isSelected = false;
-                }
-                else if (discardButton.isIfActive()) {
-                    currPlayerPile.removeCard(currPlayerCardIndex);// 移除卡牌
+                } else if (discardButton.isIfActive()) {
+                    currPlayerPile.removeCard(currPlayerCardIndex);// Remove cards
                     currPlayerCardIndex = currPlayerPile.size() - 1;
                     discardButton.setActive(false);
                     isSelected = false;
@@ -627,7 +616,7 @@ public class MDCGame implements State, Game {
         }
     }
 
-    private void runSelectCards() {
+    private void runSelectCardsPhase() {
         int currCards = currPlayer.getOwnPlayerPile().size();
         if (keysListenerBos[5])
             currPlayerCardIndex = (currPlayerCardIndex == -1 || currPlayerCardIndex == 0) ? currCards - 1 : currPlayerCardIndex - 1;
@@ -637,14 +626,14 @@ public class MDCGame implements State, Game {
         buttonController();
 
         if (currPlayerCardIndex != -1 && selectButton.isIfActive()) {
-            isSelected = true; // 卡牌选中
+            isSelected = true; // Card pick
             isPhaseOver = true;
         }
-        selectButton.setActive(false); // 防止不该选中的时候选中
-    }
-
-    private void runActionPhase() {
-
+        selectButton.setActive(false); // Prevent checking when you shouldn't
+        if (lastPhase == GamePhases.playPhase && keysListenerBos[6]) {
+            playedCardNum = 3;
+            isPhaseOver = true;
+        }
     }
 
     @Override
@@ -659,30 +648,29 @@ public class MDCGame implements State, Game {
         else if (keysListenerBos[3])
             currButton = (currButton == -1 || currButton == 0) ? buttons.size() - 1 : currButton - 1;
         if (mousesListener.getMousePoint() != null) {
-            // 方向键控制
+            // Directional key control
             for (int i = 0; i < buttons.size(); i++) {
                 Button button = buttons.get(i);
                 button.setSelected(i == currButton);
                 if (button.checkForState(mousesListener.getMousePoint(), mouseListenerBos[1],
                         mouseListenerBos[2], keysListenerBos[1])) {
                     currButton = i;
-                    button.setSelected(true); // 鼠标停留，选中
+                    button.setSelected(true); // Mouse hover and select
                 } else if (keysListenerBos[0] || mouseListenerBos[0]) {
                     currButton = -1;
                     button.setSelected(false);
                 }
-                if (i != currButton) buttons.get(i).setSelected(false); // 将其他卡牌设为为未选中
+                if (i != currButton) buttons.get(i).setSelected(false); // Set other cards to unchecked
             }
         }
     }
 
+    /**
+     * Controls the stage of a turn at which the current player plays
+     */
     private void phaseController() {
-        if (isActionPhase) {
-            isActionPhase = false; // 防止重复设置phase
-            this.lastPhase = GamePhases.valueOf(currPhase.toString());
-            this.currPhase = GamePhases.actionPhase;
-        } else if (isSelectPhase) {
-            isSelectPhase = false;
+        if (isSelectPhase) {
+            isSelectPhase = false; // Prevent repeated phase Settings
             buttons.clear();
             buttons.add(selectButton);
             this.lastPhase = GamePhases.valueOf(currPhase.toString());
@@ -697,6 +685,7 @@ public class MDCGame implements State, Game {
                         buttons.add(cancelButton);
                         buttons.add(playButton);
                         isPhaseOver = false;
+                        gameInfoBar.add("Player " + currPlayerIndex + ", it's now your turn.");
                     } else runDrawCardsPhase();
                 }
                 case playPhase -> {
@@ -708,12 +697,6 @@ public class MDCGame implements State, Game {
                         isPhaseOver = false;
                     } else runPlayCardsPhase();
                 }
-                case actionPhase -> { // TODO 特殊阶段
-                    if (isPhaseOver) {
-                        currPhase = GamePhases.valueOf(lastPhase.toString());
-                        isPhaseOver = false;
-                    } else runActionPhase();
-                }
                 case selectPhase -> {
                     if (isPhaseOver) {
                         currPhase = GamePhases.valueOf(lastPhase.toString());
@@ -723,7 +706,7 @@ public class MDCGame implements State, Game {
                         buttons.add(cancelButton);
                         if (currPhase == GamePhases.discardPhase) buttons.add(discardButton);
                         isPhaseOver = false;
-                    } else runSelectCards();
+                    } else runSelectCardsPhase();
                 }
                 case discardPhase -> {
                     if (isPhaseOver) {
@@ -731,26 +714,12 @@ public class MDCGame implements State, Game {
                         currButton = -1;
                         currPhase = GamePhases.drawPhase;
                         isPhaseOver = false;
-                        moveToNextPlayer(); // 转移到下一玩家
+                        gameInfoBar.add("End of Player " + currPlayerIndex + " discard.");
+                        moveToNextPlayer(); // Move on to the next player
                     } else runDiscardsPhase();
                 }
             }
         }
-    }
-
-    /**
-     * This method is used to determine whether there is a collision between entities. If yes, the index value of the collided entity is returned; Otherwise, return - 1
-     *
-     * @param rect    Entity causing collision
-     * @param targets List of rect that may be collided
-     */
-    private int getIntersecting(Rectangle rect, List<Rectangle> targets) {
-        for (int i = 0; i < targets.size(); i++) {
-            if (rect.intersects(targets.get(i))) {
-                return i;
-            }
-        }
-        return -1;
     }
 
     @Override
@@ -761,20 +730,26 @@ public class MDCGame implements State, Game {
     @Override
     public boolean isStateOver() {
         if (isStateOver) return true;
-        return isPause && keysListener.hasPressedExit(); // 暂停时按esc退出
+        return isPause && keysListener.hasPressedExit(); // Press esc to exit when pausing
     }
 
     @Override
     public void checkForPause() {
-        if (!isPause && keysListener.hasPressedExit()) isPause = true; // 按esc暂停
-        else if (isPause && keysListener.hasPressedEnter()) isPause = false; // 按enter取消暂停
+        if (!isPause && keysListener.hasPressedExit()) {
+            gameInfoBar.add("Game pauses.");
+            isPause = true; // Press esc to pause
+        } else if (isPause && keysListener.hasPressedEnter()) {
+            if (roundNum == 1) gameInfoBar.add("Game starts!");
+            else gameInfoBar.add("Game continues.");
+            isPause = false; // Press enter to cancel the pause
+        }
     }
 
     public void checkForWinner() {
         for (Player player : players) {
             OwnProperty propertyPile = player.getOwnProperty();
             if (propertyPile.achievedVictory()) {
-                System.out.println(currPlayerIndex + " is the winner!!!");
+                System.out.println("The winner is Player " + currPlayerIndex + "!!!!!");
                 isStateOver = true;
             }
         }

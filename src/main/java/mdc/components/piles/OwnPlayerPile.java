@@ -9,7 +9,7 @@ import mdc.components.piles.AbstractPile;
 import java.util.ArrayList;
 
 /**
- * 手牌
+ * The player's hand pile
  */
 public class OwnPlayerPile extends AbstractPile {
 

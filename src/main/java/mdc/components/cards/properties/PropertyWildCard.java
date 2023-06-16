@@ -6,15 +6,12 @@ import mdc.states.game.MDCGame;
 
 import java.util.ArrayList;
 
-/**
- * 哪几种颜色，分别是几套，租金，钱,有全色
- */
 public class PropertyWildCard extends PropertyCard {
     private ArrayList<PropertyCard> cards = new ArrayList<>();
     private boolean isDoubleColor;
     private boolean isFullColor;
 
-    // 全色牌构造器
+    // Panchromatic card constructor
     public PropertyWildCard(ArrayList<PropertyCard> cards) {
         super();
         this.isPayable = false;
@@ -22,12 +19,9 @@ public class PropertyWildCard extends PropertyCard {
         this.isFullColor = true;
         this.color = CardColor.fullColor;
         this.cards.addAll(cards);
-        for (PropertyCard card : cards) {
-            System.out.println(card.rents.size());
-        }
     }
 
-    // 双色牌构造器
+    // Two color card constructor
     public PropertyWildCard(int turnMoney, PropertyCard card1, PropertyCard card2) {
         super();
         this.isDoubleColor = true;
@@ -36,9 +30,6 @@ public class PropertyWildCard extends PropertyCard {
         this.cards.add(card1);
         this.cards.add(card2);
         this.color = CardColor.valueOf(card1.getColor().toString() + "_" + card2.getColor());
-        for (PropertyCard card : cards) {
-            System.out.println(card.rents.size());
-        }
     }
 
     @Override
@@ -46,17 +37,17 @@ public class PropertyWildCard extends PropertyCard {
         if (!isPhaseOver) {
             super.play(game);
             if (phase == CardPhase.ownPropertyPhase && game.getSelectButton().isIfActive()) {
-                // 全色
+                // full color
                 if (isFullColor) {
-                    color = game.getColors().get(game.getCurrPropertyIndex()); // 将颜色确定
+                    color = game.getColors().get(game.getCurrPropertyIndex()); // Color fix
                     for (PropertyCard card : cards) {
-                        System.out.println("card" + card.getRents().size());
-                        if (card.getColor() == color) rents.addAll(card.getRents()); // 将房产确定为对应颜色
-                        System.out.println(rents.size());
-                        break;
+                        if (card.getColor() == color) {
+                            rents.addAll(card.getRents()); //Identify the property as the corresponding color
+                            break;
+                        }
                     }
                     isPhaseOver = true;
-                    // 双色
+                    //double color
                 } else {
                     if (cards.get(0).getColor() == game.getColors().get(game.getCurrPropertyIndex())) {
                         color = cards.get(0).color;
@@ -66,7 +57,7 @@ public class PropertyWildCard extends PropertyCard {
                         color = cards.get(1).color;
                         rents.addAll(cards.get(1).getRents());
                         isPhaseOver = true;
-                    } else System.out.println("wrong color");
+                    }
                 }
                 game.getSelectButton().resetButton();
             }
@@ -86,7 +77,7 @@ public class PropertyWildCard extends PropertyCard {
 
     @Override
     public String toString() {
-        if (isFullColor) return "null"; // 全色牌
+        if (isFullColor) return "null"; // full color card
         else if (isDoubleColor) return cards.get(0).getColor().toString() + "_" + cards.get(1).getColor().toString();
         else return color.toString();
     }
