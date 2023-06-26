@@ -1,4 +1,10 @@
 # Monopoly Deal Cards
+Members:
+Xiang Li: 21372326
+Hanshu Rao: 21372327
+Hao Zhang: 21372328
+Ziqin Ma: 21372329
+
 ## Introduction
 This is a simple game that allows players to enjoy a fun gaming experience. It offers various features and controls to enhance the gameplay. Read this document to learn more about the game and how to play it.
 
